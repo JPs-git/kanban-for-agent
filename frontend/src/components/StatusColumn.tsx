@@ -9,7 +9,7 @@ interface StatusColumnProps {
   cards: CardType[];
   onCardDrop: (cardId: string, newStatus: CardStatus) => void;
   onDeleteCard: (cardId: string) => void;
-  onUpdateCard: (id: string, updates: { title?: string; content?: string; status?: CardStatus; assignee?: string; assigneeName?: string }) => void;
+  onEditCard: (card: CardType) => void;
 }
 
 const StatusColumn: React.FC<StatusColumnProps> = ({ 
@@ -17,7 +17,7 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
   cards, 
   onCardDrop, 
   onDeleteCard, 
-  onUpdateCard 
+  onEditCard 
 }) => {
   const [{ isOver }, drop] = useDrop({
     accept: 'CARD',
@@ -56,7 +56,7 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
             key={card._id} 
             card={card} 
             onDelete={onDeleteCard} 
-            onUpdate={onUpdateCard}
+            onEdit={onEditCard}
           />
         ))}
       </div>

@@ -15,8 +15,8 @@ exports.getCards = getCards;
 const createCard = async (req, res) => {
     try {
         const { title, content, status, assignee, assigneeName } = req.body;
-        if (!title || !content) {
-            return res.status(400).json({ error: 'Title and content are required' });
+        if (!title) {
+            return res.status(400).json({ error: 'Title is required' });
         }
         const card = new Card_1.Card({
             title,

@@ -5,6 +5,7 @@ import { CardStatus } from '../types';
 import type { Card, CardCreate } from '../types';
 import { useKanban } from '../hooks/useKanban';
 import StatusColumn from './StatusColumn';
+import CardEditModal from './CardEditModal';
 
 // 模拟用户数据
 const mockUsers = [
@@ -24,6 +25,8 @@ const KanbanBoard: React.FC = () => {
     assignee: '',
     assigneeName: '未分配'
   });
+  const [editCard, setEditCard] = useState<Card | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // 按状态分组卡片
   const groupedCards = cards.reduce((acc, card) => {
@@ -37,6 +40,12 @@ const KanbanBoard: React.FC = () => {
   // 处理卡片拖放
   const handleCardDrop = (cardId: string, newStatus: CardStatus) => {
     updateCardStatus(cardId, newStatus);
+  };
+
+  // 处理卡片编辑
+  const handleCardEdit = (card: Card) => {
+    setEditCard(card);
+    setIsEditModalOpen(true);
   };
 
   // 处理卡片更新
@@ -54,10 +63,16 @@ const KanbanBoard: React.FC = () => {
     });
   };
 
+  // 处理模态框关闭
+  const handleModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditCard(null);
+  };
+
   // 处理添加卡片
   const handleAddCard = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newCard.title && newCard.content) {
+    if (newCard.title) {
       const assigneeName = newCard.assignee ? mockUsers.find(user => user.id === newCard.assignee)?.name || '未分配' : '未分配';
       await addCard({
         ...newCard,
@@ -102,7 +117,6 @@ const KanbanBoard: React.FC = () => {
               placeholder="Card content"
               value={newCard.content}
               onChange={(e) => setNewCard({ ...newCard, content: e.target.value })}
-              required
             />
             <select
               value={newCard.status}
@@ -143,10 +157,17 @@ const KanbanBoard: React.FC = () => {
               cards={groupedCards[status] || []}
               onCardDrop={handleCardDrop}
               onDeleteCard={removeCard}
-              onUpdateCard={handleCardUpdate}
+              onEditCard={handleCardEdit}
             />
           ))}
         </div>
+        
+        <CardEditModal
+          card={editCard}
+          isOpen={isEditModalOpen}
+          onClose={handleModalClose}
+          onSave={handleCardUpdate}
+        />
       </div>
     </DndProvider>
   );
