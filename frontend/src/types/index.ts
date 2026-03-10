@@ -15,16 +15,22 @@ export interface Card {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  assignee?: string;
+  assigneeName?: string;
 }
 
 export interface CardCreate {
   title: string;
   content: string;
   status?: CardStatus;
+  assignee?: string;
+  assigneeName?: string;
 }
 
 export interface CardUpdate {
   title?: string;
   content?: string;
   status?: CardStatus;
+  assignee?: string;
+  assigneeName?: string;
 }

@@ -12,7 +12,7 @@ export const getCards = async (req: Request, res: Response) => {
 
 export const createCard = async (req: Request, res: Response) => {
   try {
-    const { title, content, status } = req.body;
+    const { title, content, status, assignee, assigneeName } = req.body;
     
     if (!title || !content) {
       return res.status(400).json({ error: 'Title and content are required' });
@@ -21,7 +21,9 @@ export const createCard = async (req: Request, res: Response) => {
     const card = new Card({
       title,
       content,
-      status: status || CardStatus.TODO
+      status: status || CardStatus.TODO,
+      assignee,
+      assigneeName
     });
     
     const savedCard = await card.save();
@@ -34,14 +36,14 @@ export const createCard = async (req: Request, res: Response) => {
 export const updateCard = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, content, status } = req.body;
+    const { title, content, status, assignee, assigneeName } = req.body;
     
     console.log('Updating card with id:', id);
-    console.log('Update data:', { title, content, status });
+    console.log('Update data:', { title, content, status, assignee, assigneeName });
     
     const card = await Card.findByIdAndUpdate(
       id,
-      { title, content, status },
+      { title, content, status, assignee, assigneeName },
       { returnDocument: 'after', runValidators: true }
     );
     

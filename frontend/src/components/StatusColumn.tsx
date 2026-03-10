@@ -9,7 +9,7 @@ interface StatusColumnProps {
   cards: CardType[];
   onCardDrop: (cardId: string, newStatus: CardStatus) => void;
   onDeleteCard: (cardId: string) => void;
-  onUpdateCard: (id: string, updates: { title?: string; content?: string; status?: CardStatus }) => void;
+  onUpdateCard: (id: string, updates: { title?: string; content?: string; status?: CardStatus; assignee?: string; assigneeName?: string }) => void;
 }
 
 const StatusColumn: React.FC<StatusColumnProps> = ({ 

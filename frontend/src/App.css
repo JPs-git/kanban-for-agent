@@ -215,6 +215,28 @@ body {
   color: #666;
 }
 
+/* 分配人员显示样式 */
+.card-assignee-display {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.assignee-label {
+  color: #888;
+  margin-right: 4px;
+}
+
+.assignee-name {
+  color: #333;
+  font-weight: 500;
+  background-color: #f0f8ff;
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid #e0f0ff;
+}
+
 .card-footer {
   display: flex;
   justify-content: space-between;
@@ -253,6 +275,36 @@ body {
   font-family: inherit;
   resize: vertical;
   margin-bottom: 8px;
+}
+
+/* 分配人员选择样式 */
+.card-assignee {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-assignee label {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.assignee-select {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.assignee-select:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
 .edit-buttons {

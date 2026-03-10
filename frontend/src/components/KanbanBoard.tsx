@@ -6,13 +6,23 @@ import type { Card, CardCreate } from '../types';
 import { useKanban } from '../hooks/useKanban';
 import StatusColumn from './StatusColumn';
 
+// 模拟用户数据
+const mockUsers = [
+  { id: '1', name: '张三' },
+  { id: '2', name: '李四' },
+  { id: '3', name: '王五' },
+  { id: '4', name: '赵六' }
+];
+
 const KanbanBoard: React.FC = () => {
   const { cards, loading, error, addCard, updateCardStatus, removeCard, fetchCards } = useKanban();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCard, setNewCard] = useState<CardCreate>({
     title: '',
     content: '',
-    status: CardStatus.TODO
+    status: CardStatus.TODO,
+    assignee: '',
+    assigneeName: '未分配'
   });
 
   // 按状态分组卡片
@@ -30,7 +40,7 @@ const KanbanBoard: React.FC = () => {
   };
 
   // 处理卡片更新
-  const handleCardUpdate = (id: string, updates: { title?: string; content?: string; status?: CardStatus }) => {
+  const handleCardUpdate = (id: string, updates: { title?: string; content?: string; status?: CardStatus; assignee?: string; assigneeName?: string }) => {
     // 这里可以添加更新卡片的逻辑
     // 目前updateCardStatus只更新状态，我们需要添加一个新的API调用或修改现有函数
     // 为了简化，我们可以直接调用API的updateCard函数
@@ -48,8 +58,12 @@ const KanbanBoard: React.FC = () => {
   const handleAddCard = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newCard.title && newCard.content) {
-      await addCard(newCard);
-      setNewCard({ title: '', content: '', status: CardStatus.TODO });
+      const assigneeName = newCard.assignee ? mockUsers.find(user => user.id === newCard.assignee)?.name || '未分配' : '未分配';
+      await addCard({
+        ...newCard,
+        assigneeName: assigneeName
+      });
+      setNewCard({ title: '', content: '', status: CardStatus.TODO, assignee: '', assigneeName: '未分配' });
       setShowAddForm(false);
     }
   };
@@ -105,6 +119,17 @@ const KanbanBoard: React.FC = () => {
                   <option key={status} value={status}>{statusLabels[status]}</option>
                 );
               })}
+            </select>
+            <select
+              value={newCard.assignee}
+              onChange={(e) => setNewCard({ ...newCard, assignee: e.target.value })}
+            >
+              <option value="">未分配</option>
+              {mockUsers.map(user => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
             </select>
             <button type="submit">Create Card</button>
           </form>
