@@ -31,8 +31,11 @@
 2. 检查是否包含工作流更新关键字
 3. 如果包含，更新工作流文档
 4. 执行用户请求的其他任务
-5. 在测试过程中，收集所有出现的报错
-6. 将报错总结按照条目存放在 `c:\Users\Administrator\Projects\kanban-for-agent\.trae\documents\errors.md` 文档中
+5. 在开发过程中，收集所有执行过程中的错误信息，包括：
+   - 前端控制台错误
+   - 终端执行报错
+   - 接口报错
+6. 将错误总结按照条目存放在 `c:\Users\Administrator\Projects\kanban-for-agent\.trae\documents\errors.md` 文档中
 7. 完成后提供结果
 
 ### 文档维护
