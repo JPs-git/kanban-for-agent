@@ -4,9 +4,9 @@ import type { Card as CardType } from "../types";
 import { CardStatus } from "../types";
 
 interface CardProps {
-  card: CardType;
+  card: Partial<CardType>;
   onDelete: (id: string) => void;
-  onEdit: (card: CardType) => void;
+  onEdit: (card: Partial<CardType>) => void;
 }
 
 const Card: React.FC<CardProps> = ({ card, onDelete, onEdit }) => {

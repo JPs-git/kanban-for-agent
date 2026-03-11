@@ -6,10 +6,10 @@ import Card from './Card';
 
 interface StatusColumnProps {
   status: CardStatus;
-  cards: CardType[];
+  cards: Partial<CardType>[];
   onCardDrop: (cardId: string, newStatus: CardStatus) => void;
   onDeleteCard: (cardId: string) => void;
-  onEditCard: (card: CardType) => void;
+  onEditCard: (card: Partial<CardType>) => void;
 }
 
 const StatusColumn: React.FC<StatusColumnProps> = ({ 

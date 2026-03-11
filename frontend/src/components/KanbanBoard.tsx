@@ -35,7 +35,7 @@ const KanbanBoard: React.FC = () => {
     fetchCards,
   } = useKanban();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editCard, setEditCard] = useState<Card | null>(null);
+  const [editCard, setEditCard] = useState<Partial<Card> | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
@@ -78,7 +78,7 @@ const KanbanBoard: React.FC = () => {
   };
 
   // 处理卡片编辑
-  const handleCardEdit = (card: Card) => {
+  const handleCardEdit = (card: Partial<Card>) => {
     setEditCard(card);
     setIsEditModalOpen(true);
   };

@@ -10,7 +10,7 @@ interface User {
 }
 
 interface CardEditModalProps {
-  card: Card | null;
+  card: Partial<Card> | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (id: string, updates: { title?: string; content?: string; status?: CardStatus; assignee?: string; assigneeName?: string }) => void;
