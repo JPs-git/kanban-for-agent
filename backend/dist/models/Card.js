@@ -20,7 +20,7 @@ const cardSchema = new mongoose_1.default.Schema({
     },
     content: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
     },
     status: {

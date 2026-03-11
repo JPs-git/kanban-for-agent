@@ -2,22 +2,20 @@ import React, { useState, useEffect } from 'react';
 import type { Card } from '../types';
 import { CardStatus } from '../types';
 
+interface User {
+  id: string;
+  name: string;
+}
+
 interface CardEditModalProps {
   card: Card | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (id: string, updates: { title?: string; content?: string; status?: CardStatus; assignee?: string; assigneeName?: string }) => void;
+  users: User[];
 }
 
-// 模拟用户数据
-const mockUsers = [
-  { id: '1', name: '张三' },
-  { id: '2', name: '李四' },
-  { id: '3', name: '王五' },
-  { id: '4', name: '赵六' }
-];
-
-const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave }) => {
+const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave, users }) => {
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [editStatus, setEditStatus] = useState<CardStatus>(CardStatus.TODO);
@@ -41,7 +39,7 @@ const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, on
 
   const handleSave = () => {
     if (editTitle.trim() && card) {
-      const assigneeName = editAssignee ? mockUsers.find(user => user.id === editAssignee)?.name || '未分配' : '未分配';
+      const assigneeName = editAssignee ? users.find(user => user.id === editAssignee)?.name || '未分配' : '未分配';
       onSave(card._id, {
         title: editTitle,
         content: editContent,
@@ -108,7 +106,7 @@ const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, on
               className="modal-select"
             >
               <option value="">未分配</option>
-              {mockUsers.map(user => (
+              {users.map(user => (
                 <option key={user.id} value={user.id}>{user.name}</option>
               ))}
             </select>
