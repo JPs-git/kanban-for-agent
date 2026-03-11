@@ -31,7 +31,7 @@ const Card: React.FC<CardProps> = ({ card, onDelete, onEdit }) => {
 
   return (
     <div
-      ref={drag as any}
+      ref={drag as React.Ref<HTMLDivElement>}
       className="card"
       style={{
         opacity: isDragging ? 0.5 : 1,
