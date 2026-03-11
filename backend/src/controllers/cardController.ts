@@ -5,7 +5,7 @@ export const getCards = async (req: Request, res: Response) => {
   try {
     const cards = await Card.find();
     res.status(200).json(cards);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to get cards' });
   }
 };
@@ -28,7 +28,7 @@ export const createCard = async (req: Request, res: Response) => {
     
     const savedCard = await card.save();
     res.status(201).json(savedCard);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to create card' });
   }
 };
@@ -71,7 +71,7 @@ export const deleteCard = async (req: Request, res: Response) => {
     }
     
     res.status(200).json({ message: 'Card deleted successfully' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to delete card' });
   }
 };
