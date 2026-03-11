@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { render, screen } from '@testing-library/react';
 import StatusColumn from './StatusColumn';
 import { CardStatus } from '../types';
@@ -14,7 +14,7 @@ vi.mock('react-dnd', () => ({
 // 模拟Card组件
 vi.mock('./Card', () => {
   return {
-    default: function MockCard({ card, onDelete, onEdit }: any) {
+    default: function MockCard({ card, onDelete, onEdit }: { card: { _id: string; title: string }; onDelete: (id: string) => void; onEdit: (card: { _id: string; title: string }) => void }) {
       return (
         <div data-testid={`card-${card._id}`}>
           <h3>{card.title}</h3>

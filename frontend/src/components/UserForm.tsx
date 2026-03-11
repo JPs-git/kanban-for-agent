@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface User {
   id: string;
@@ -12,21 +12,9 @@ interface UserFormProps {
 }
 
 const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
-  const [id, setId] = useState('');
-  const [name, setName] = useState('');
+  const id = user?.id || '';
+  const [name, setName] = useState(() => user?.name || '');
   const [errors, setErrors] = useState<{ id?: string; name?: string }>({});
-
-  // 当user变化时，更新表单数据
-  useEffect(() => {
-    if (user) {
-      setId(user.id);
-      setName(user.name);
-    } else {
-      setId('');
-      setName('');
-    }
-    setErrors({});
-  }, [user]);
 
   // 表单验证
   const validateForm = (): boolean => {

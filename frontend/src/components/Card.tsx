@@ -31,7 +31,7 @@ const Card: React.FC<CardProps> = ({ card, onDelete, onEdit }) => {
 
   return (
     <div
-      ref={drag as any}
+      ref={drag}
       className="card"
       style={{
         opacity: isDragging ? 0.5 : 1,
@@ -45,7 +45,9 @@ const Card: React.FC<CardProps> = ({ card, onDelete, onEdit }) => {
           className="delete-button"
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(card._id);
+            if (card._id) {
+              onDelete(card._id);
+            }
           }}
           aria-label="Delete card"
         >
