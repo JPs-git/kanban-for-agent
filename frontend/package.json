@@ -13,7 +13,7 @@
     "test:coverage": "vitest run --coverage",
     "e2e": "cypress open",
     "e2e:run": "cypress run",
-    "ci": "npx rimraf node_modules dist && npm install && npm run lint && npm run build && npm test"
+    "ci": "npm install && npm run lint && npm run build && npm test"
   },
   "dependencies": {
     "react": "^19.2.0",
