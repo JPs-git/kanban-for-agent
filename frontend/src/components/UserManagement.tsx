@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import UserForm from './UserForm';
-import UserDeleteConfirm from './UserDeleteConfirm';
+import React, { useState } from "react";
+import UserForm from "./UserForm";
+import UserDeleteConfirm from "./UserDeleteConfirm";
+import Button from "./Button";
+import Modal from "./Modal";
 
 interface User {
   id: string;
@@ -18,19 +20,21 @@ const UserManagement: React.FC<UserManagementProps> = ({
   isOpen,
   onClose,
   users,
-  onUsersChange
+  onUsersChange,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'id' | 'name'>('id');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"id" | "name">("id");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   // 过滤和排序用户列表
   const filteredAndSortedUsers = users
-    .filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
     .sort((a, b) => {
-      if (sortBy === 'id') {
+      if (sortBy === "id") {
         return a.id.localeCompare(b.id);
       } else {
         return a.name.localeCompare(b.name);
@@ -42,7 +46,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
     // 自动生成唯一id
     const newUser = {
       ...user,
-      id: Math.random().toString(36).substring(2, 9)
+      id: Math.random().toString(36).substring(2, 9),
     };
     onUsersChange([...users, newUser]);
     setIsAddFormOpen(false);
@@ -50,108 +54,102 @@ const UserManagement: React.FC<UserManagementProps> = ({
 
   // 处理编辑用户
   const handleEditUser = (updatedUser: User) => {
-    onUsersChange(users.map(user => user.id === updatedUser.id ? updatedUser : user));
+    onUsersChange(
+      users.map((user) => (user.id === updatedUser.id ? updatedUser : user))
+    );
     setEditingUser(null);
   };
 
   // 处理删除用户
   const handleDeleteUser = (userId: string) => {
-    onUsersChange(users.filter(user => user.id !== userId));
+    onUsersChange(users.filter((user) => user.id !== userId));
     setUserToDelete(null);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="user-management-overlay">
-      <div className="user-management-panel">
-        <div className="user-management-header">
-          <h2>用户管理</h2>
-          <button className="close-button" onClick={onClose}>&times;</button>
-        </div>
-
-        <div className="user-management-search">
-          <input
-            type="text"
-            placeholder="搜索用户..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'id' | 'name')}
-            className="sort-select"
-          >
-            <option value="id">按ID排序</option>
-            <option value="name">按名称排序</option>
-          </select>
-        </div>
-
-        <div className="user-list">
-          {filteredAndSortedUsers.length === 0 ? (
-            <div className="empty-state">暂无用户</div>
-          ) : (
-            filteredAndSortedUsers.map(user => (
-              <div key={user.id} className="user-item">
-                <div className="user-info">
-                  <span className="user-id">ID: {user.id}</span>
-                  <span className="user-name">{user.name}</span>
-                </div>
-                <div className="user-actions">
-                  <button
-                    className="edit-button"
-                    onClick={() => setEditingUser(user)}
-                  >
-                    编辑
-                  </button>
-                  <button
-                    className="delete-button"
-                    onClick={() => setUserToDelete(user)}
-                  >
-                    删除
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <button
-          className="add-user-button"
-          onClick={() => setIsAddFormOpen(true)}
+    <Modal isOpen={isOpen} onClose={onClose} title="用户管理" width="400px">
+      <div className="user-management-search">
+        <input
+          type="text"
+          placeholder="搜索用户..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as "id" | "name")}
+          className="sort-select"
         >
-          添加用户
-        </button>
+          <option value="id">按ID排序</option>
+          <option value="name">按名称排序</option>
+        </select>
+      </div>
 
-        {/* 添加用户表单 */}
-        {isAddFormOpen && (
-          <UserForm
-            onSave={handleAddUser}
-            onCancel={() => setIsAddFormOpen(false)}
-            user={null}
-          />
-        )}
-
-        {/* 编辑用户表单 */}
-        {editingUser && (
-          <UserForm
-            onSave={handleEditUser}
-            onCancel={() => setEditingUser(null)}
-            user={editingUser}
-          />
-        )}
-
-        {/* 删除用户确认 */}
-        {userToDelete && (
-          <UserDeleteConfirm
-            user={userToDelete}
-            onConfirm={() => handleDeleteUser(userToDelete.id)}
-            onCancel={() => setUserToDelete(null)}
-          />
+      <div className="user-list">
+        {filteredAndSortedUsers.length === 0 ? (
+          <div className="empty-state">暂无用户</div>
+        ) : (
+          filteredAndSortedUsers.map((user) => (
+            <div key={user.id} className="user-item">
+              <div className="user-info">
+                <span className="user-id">ID: {user.id}</span>
+                <span className="user-name">{user.name}</span>
+              </div>
+              <div className="user-actions">
+                <Button
+                  variant="primary"
+                  size="small"
+                  onClick={() => setEditingUser(user)}
+                >
+                  编辑
+                </Button>
+                <Button
+                  variant="danger"
+                  size="small"
+                  onClick={() => setUserToDelete(user)}
+                >
+                  删除
+                </Button>
+              </div>
+            </div>
+          ))
         )}
       </div>
-    </div>
+
+      <Button variant="success" onClick={() => setIsAddFormOpen(true)}>
+        添加用户
+      </Button>
+
+      {/* 添加用户表单 */}
+      {isAddFormOpen && (
+        <UserForm
+          onSave={handleAddUser}
+          onCancel={() => setIsAddFormOpen(false)}
+          user={null}
+        />
+      )}
+
+      {/* 编辑用户表单 */}
+      {editingUser && (
+        <UserForm
+          onSave={handleEditUser}
+          onCancel={() => setEditingUser(null)}
+          user={editingUser}
+        />
+      )}
+
+      {/* 删除用户确认 */}
+      {userToDelete && (
+        <UserDeleteConfirm
+          user={userToDelete}
+          onConfirm={() => handleDeleteUser(userToDelete.id)}
+          onCancel={() => setUserToDelete(null)}
+        />
+      )}
+    </Modal>
   );
 };
 

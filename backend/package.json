@@ -6,7 +6,11 @@
     "dev": "ts-node-dev src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "ci": "npm run lint && npm run test && rimraf node_modules dist && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +25,14 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.4.0",
+    "@types/supertest": "^7.2.0",
+    "eslint": "^9.39.1",
+    "jest": "^30.3.0",
+    "rimraf": "^5.0.5",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.6.2"
   }

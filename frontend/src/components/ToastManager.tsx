@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import Toast from './Toast';
+import React from "react";
+import Toast from "./Toast";
 
 interface ToastItem {
   id: string;
   message: string;
-  type: 'success' | 'warning' | 'error';
+  type: "success" | "warning" | "error";
   duration?: number;
 }
 
@@ -16,7 +16,7 @@ interface ToastManagerProps {
 const ToastManager: React.FC<ToastManagerProps> = ({ toasts, onClose }) => {
   return (
     <div className="toast-manager">
-      {toasts.map(toast => (
+      {toasts.map((toast) => (
         <Toast
           key={toast.id}
           message={toast.message}

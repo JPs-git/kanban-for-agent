@@ -1,3 +1,12 @@
 node_modules
 .DS_Store
 *.log
+
+# Cypress test screenshots
+frontend/cypress/screenshots/
+backend/node_modules
+frontend/node_modules
+backend/dist
+frontend/dist
+frontend/coverage
+backend/coverage

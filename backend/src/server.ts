@@ -3,7 +3,7 @@ import cors from 'cors';
 import { connectDB } from './config/db';
 import cardRoutes from './routes/cardRoutes';
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 中间件
@@ -31,4 +31,7 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// 只有在直接运行时才启动服务器
+if (require.main === module) {
+  startServer();
+}

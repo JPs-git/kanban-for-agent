@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { Card } from '../types';
 import { CardStatus } from '../types';
+import Modal from './Modal';
+import Button from './Button';
 
 interface User {
   id: string;
@@ -54,70 +56,62 @@ const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, on
   if (!isOpen || !card) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h3>编辑卡片</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
-        </div>
-        <div className="modal-body">
-          <div className="form-group">
-            <label htmlFor="edit-title">标题</label>
-            <input
-              type="text"
-              id="edit-title"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              className="modal-input"
-              placeholder="Card title"
-              autoFocus
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="edit-content">内容</label>
-            <textarea
-              id="edit-content"
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="modal-textarea"
-              placeholder="Card content"
-              rows={4}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="edit-status">状态</label>
-            <select
-              id="edit-status"
-              value={editStatus}
-              onChange={(e) => setEditStatus(e.target.value as CardStatus)}
-              className="modal-select"
-            >
-              {Object.values(CardStatus).map((status) => (
-                <option key={status} value={status}>{statusLabels[status]}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="edit-assignee">分配给</label>
-            <select
-              id="edit-assignee"
-              value={editAssignee}
-              onChange={(e) => setEditAssignee(e.target.value)}
-              className="modal-select"
-            >
-              <option value="">未分配</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>{user.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="modal-footer">
-          <button className="modal-cancel" onClick={onClose}>取消</button>
-          <button className="modal-save" onClick={handleSave}>保存</button>
-        </div>
+    <Modal isOpen={isOpen} onClose={onClose} title="编辑卡片" width="500px">
+      <div className="form-group">
+        <label htmlFor="edit-title">标题</label>
+        <input
+          type="text"
+          id="edit-title"
+          value={editTitle}
+          onChange={(e) => setEditTitle(e.target.value)}
+          className="modal-input"
+          placeholder="Card title"
+          autoFocus
+        />
       </div>
-    </div>
+      <div className="form-group">
+        <label htmlFor="edit-content">内容</label>
+        <textarea
+          id="edit-content"
+          value={editContent}
+          onChange={(e) => setEditContent(e.target.value)}
+          className="modal-textarea"
+          placeholder="Card content"
+          rows={4}
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor="edit-status">状态</label>
+        <select
+          id="edit-status"
+          value={editStatus}
+          onChange={(e) => setEditStatus(e.target.value as CardStatus)}
+          className="modal-select"
+        >
+          {Object.values(CardStatus).map((status) => (
+            <option key={status} value={status}>{statusLabels[status]}</option>
+          ))}
+        </select>
+      </div>
+      <div className="form-group">
+        <label htmlFor="edit-assignee">分配给</label>
+        <select
+          id="edit-assignee"
+          value={editAssignee}
+          onChange={(e) => setEditAssignee(e.target.value)}
+          className="modal-select"
+        >
+          <option value="">未分配</option>
+          {users.map(user => (
+            <option key={user.id} value={user.id}>{user.name}</option>
+          ))}
+        </select>
+      </div>
+      <div className="modal-footer">
+        <Button variant="secondary" onClick={onClose}>取消</Button>
+        <Button variant="success" onClick={handleSave}>保存</Button>
+      </div>
+    </Modal>
   );
 };
 

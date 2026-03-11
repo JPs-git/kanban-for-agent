@@ -6,8 +6,10 @@ import type { Card, CardCreate } from "../types";
 import { useKanban } from "../hooks/useKanban";
 import StatusColumn from "./StatusColumn";
 import CardEditModal from "./CardEditModal";
+import AddCardModal from "./AddCardModal";
 import UserManagement from "./UserManagement";
 import ToastManager from "./ToastManager";
+import Button from "./Button";
 
 // 模拟用户数据
 const mockUsers = [
@@ -32,14 +34,7 @@ const KanbanBoard: React.FC = () => {
     removeCard,
     fetchCards,
   } = useKanban();
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newCard, setNewCard] = useState<CardCreate>({
-    title: "",
-    content: "",
-    status: CardStatus.TODO,
-    assignee: "",
-    assigneeName: "未分配",
-  });
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editCard, setEditCard] = useState<Card | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [users, setUsers] = useState<User[]>(mockUsers);
@@ -105,7 +100,7 @@ const KanbanBoard: React.FC = () => {
     import("../services/api").then((api) => {
       api
         .updateCard(id, updates)
-        .then((updatedCard) => {
+        .then(() => {
           // 刷新卡片列表
           fetchCards();
           showToast("卡片更新成功", "success");
@@ -124,32 +119,13 @@ const KanbanBoard: React.FC = () => {
   };
 
   // 处理添加卡片
-  const handleAddCard = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newCard.title) {
-      try {
-        const assigneeName = newCard.assignee
-          ? users.find((user) => user.id === newCard.assignee)?.name || "未分配"
-          : "未分配";
-        await addCard({
-          ...newCard,
-          assigneeName: assigneeName,
-        });
-        setNewCard({
-          title: "",
-          content: "",
-          status: CardStatus.TODO,
-          assignee: "",
-          assigneeName: "未分配",
-        });
-        setShowAddForm(false);
-        showToast("卡片添加成功", "success");
-      } catch (error) {
-        console.error("添加卡片失败:", error);
-        showToast("添加卡片失败，请稍后重试", "error");
-      }
-    } else {
-      showToast("请输入卡片标题", "warning");
+  const handleAddCard = async (card: CardCreate) => {
+    try {
+      await addCard(card);
+      showToast("卡片添加成功", "success");
+    } catch (error) {
+      console.error("添加卡片失败:", error);
+      showToast("添加卡片失败，请稍后重试", "error");
     }
   };
 
@@ -167,75 +143,17 @@ const KanbanBoard: React.FC = () => {
         <div className="board-header">
           <h1>Kanban Board</h1>
           <div className="header-buttons">
-            <button
-              className="add-button"
-              onClick={() => setShowAddForm(!showAddForm)}
-            >
-              {showAddForm ? "Cancel" : "Add Card"}
-            </button>
-            <button
-              className="user-management-button"
+            <Button variant="success" onClick={() => setIsAddModalOpen(true)}>
+              Add Card
+            </Button>
+            <Button
+              variant="primary"
               onClick={() => setIsUserManagementOpen(true)}
             >
               用户管理
-            </button>
+            </Button>
           </div>
         </div>
-
-        {showAddForm && (
-          <form className="add-card-form" onSubmit={handleAddCard}>
-            <input
-              type="text"
-              placeholder="Card title"
-              value={newCard.title}
-              onChange={(e) =>
-                setNewCard({ ...newCard, title: e.target.value })
-              }
-              required
-            />
-            <textarea
-              placeholder="Card content"
-              value={newCard.content}
-              onChange={(e) =>
-                setNewCard({ ...newCard, content: e.target.value })
-              }
-            />
-            <select
-              value={newCard.status}
-              onChange={(e) =>
-                setNewCard({ ...newCard, status: e.target.value as CardStatus })
-              }
-            >
-              {Object.values(CardStatus).map((status) => {
-                const statusLabels: Record<CardStatus, string> = {
-                  [CardStatus.TODO]: "待处理",
-                  [CardStatus.IN_PROGRESS]: "进行中",
-                  [CardStatus.DONE]: "已完成",
-                  [CardStatus.REJECTED]: "已拒绝",
-                };
-                return (
-                  <option key={status} value={status}>
-                    {statusLabels[status]}
-                  </option>
-                );
-              })}
-            </select>
-            <select
-              value={newCard.assignee}
-              onChange={(e) =>
-                setNewCard({ ...newCard, assignee: e.target.value })
-              }
-            >
-              <option value="">未分配</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
-            <button type="submit">Create Card</button>
-          </form>
-        )}
 
         <div className="board-content">
           {Object.values(CardStatus).map((status) => (
@@ -255,6 +173,13 @@ const KanbanBoard: React.FC = () => {
           isOpen={isEditModalOpen}
           onClose={handleModalClose}
           onSave={handleCardUpdate}
+          users={users}
+        />
+
+        <AddCardModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddCard}
           users={users}
         />
 
