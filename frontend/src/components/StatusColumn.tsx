@@ -40,7 +40,7 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
 
   return (
     <div 
-      ref={drop as React.Ref<HTMLDivElement>}
+      ref={drop as unknown as React.Ref<HTMLDivElement>}
       className="status-column"
       style={{
         backgroundColor: isOver ? '#f0f0f0' : '#f9f9f9',
