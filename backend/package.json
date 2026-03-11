@@ -11,7 +11,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
-    "ci": "npm run lint && npm run test && rimraf node_modules dist && npm install && npm run build"
+    "ci": "npx rimraf node_modules dist && npm install && npm run lint && npm run build && npm test"
   },
   "keywords": [],
   "author": "",
