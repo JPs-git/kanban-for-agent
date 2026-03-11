@@ -14,8 +14,5 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
-    - run: npm ci
-    - run: npm test
-    - run: npm run build
-    - run: npm run lint
+        node-version: '20'
+    - run: npm run ci

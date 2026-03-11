@@ -1,6 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev src/server.ts",
@@ -10,7 +11,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
-    "ci": "npm run lint && npm run test && rimraf node_modules dist && npm install && npm run build"
+    "ci": "npx rimraf node_modules dist && npm install && npm run lint && npm run build && npm test"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,8 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^25.4.0",
     "@types/supertest": "^7.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
     "eslint": "^9.39.1",
     "jest": "^30.3.0",
     "rimraf": "^5.0.5",
