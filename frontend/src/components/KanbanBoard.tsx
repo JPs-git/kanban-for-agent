@@ -4,6 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { CardStatus } from "../types";
 import type { Card, CardCreate } from "../types";
 import { useKanban } from "../hooks/useKanban";
+import { useUsers } from "../hooks/useUsers";
 import StatusColumn from "./StatusColumn";
 import CardEditModal from "./CardEditModal";
 import AddCardModal from "./AddCardModal";
@@ -11,33 +12,29 @@ import UserManagement from "./UserManagement";
 import ToastManager from "./ToastManager";
 import Button from "./Button";
 
-// 模拟用户数据
-const mockUsers = [
-  { id: "1", name: "张三" },
-  { id: "2", name: "李四" },
-  { id: "3", name: "王五" },
-  { id: "4", name: "赵六" },
-];
-
-interface User {
-  id: string;
-  name: string;
-}
-
 const KanbanBoard: React.FC = () => {
   const {
     cards,
-    loading,
-    error,
+    loading: cardsLoading,
+    error: cardsError,
+    fetchCards,
     addCard,
     updateCardStatus,
     removeCard,
-    fetchCards,
   } = useKanban();
+
+  const {
+    users,
+    loading: usersLoading,
+    error: usersError,
+    addUser,
+    updateUser,
+    removeUser,
+  } = useUsers();
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editCard, setEditCard] = useState<Partial<Card> | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [users, setUsers] = useState<User[]>(mockUsers);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
   const [toasts, setToasts] = useState<
     Array<{
@@ -94,14 +91,10 @@ const KanbanBoard: React.FC = () => {
       assigneeName?: string;
     }
   ) => {
-    // 这里可以添加更新卡片的逻辑
-    // 目前updateCardStatus只更新状态，我们需要添加一个新的API调用或修改现有函数
-    // 为了简化，我们可以直接调用API的updateCard函数
     import("../services/api").then((api) => {
       api
         .updateCard(id, updates)
         .then(() => {
-          // 刷新卡片列表
           fetchCards();
           showToast("卡片更新成功", "success");
         })
@@ -128,6 +121,45 @@ const KanbanBoard: React.FC = () => {
       showToast("添加卡片失败，请稍后重试", "error");
     }
   };
+
+  // 处理添加用户
+  const handleAddUser = async (name: string) => {
+    try {
+      await addUser(name);
+      showToast("用户添加成功", "success");
+    } catch (error) {
+      console.error("添加用户失败:", error);
+      showToast("添加用户失败，请稍后重试", "error");
+      throw error;
+    }
+  };
+
+  // 处理更新用户
+  const handleUpdateUser = async (id: string, name: string) => {
+    try {
+      await updateUser(id, name);
+      showToast("用户更新成功", "success");
+    } catch (error) {
+      console.error("更新用户失败:", error);
+      showToast("更新用户失败，请稍后重试", "error");
+      throw error;
+    }
+  };
+
+  // 处理删除用户
+  const handleDeleteUser = async (id: string) => {
+    try {
+      await removeUser(id);
+      showToast("用户删除成功", "success");
+    } catch (error) {
+      console.error("删除用户失败:", error);
+      showToast("删除用户失败，请稍后重试", "error");
+      throw error;
+    }
+  };
+
+  const loading = cardsLoading || usersLoading;
+  const error = cardsError || usersError;
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -187,7 +219,10 @@ const KanbanBoard: React.FC = () => {
           isOpen={isUserManagementOpen}
           onClose={() => setIsUserManagementOpen(false)}
           users={users}
-          onUsersChange={setUsers}
+          onAddUser={handleAddUser}
+          onUpdateUser={handleUpdateUser}
+          onDeleteUser={handleDeleteUser}
+          loading={usersLoading}
         />
 
         <ToastManager toasts={toasts} onClose={closeToast} />

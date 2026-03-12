@@ -1,9 +1,5 @@
 import React from 'react';
-
-interface User {
-  id: string;
-  name: string;
-}
+import type { User } from '../types';
 
 interface UserDeleteConfirmProps {
   user: User;

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectDB } from './config/db.js';
 import cardRoutes from './routes/cardRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 export const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,9 @@ app.get('/api', (req, res) => {
 // 卡片路由
 app.use('/api/cards', cardRoutes);
 
+// 用户路由
+app.use('/api/users', userRoutes);
+
 // 启动服务器
 const startServer = async () => {
   try {
@@ -31,5 +35,7 @@ const startServer = async () => {
   }
 };
 
-// 启动服务器
-startServer();
+// 只在非测试环境下启动服务器
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}

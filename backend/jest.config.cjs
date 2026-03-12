@@ -1,3 +1,5 @@
+process.env.NODE_ENV = 'test';
+
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
@@ -5,6 +7,9 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js'],
   transform: {
     '^.+\.ts$': 'ts-jest'
+  },
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   collectCoverage: true,
   coverageDirectory: 'coverage',

@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
-import type { Card } from '../types';
+import type { Card, User } from '../types';
 import { CardStatus } from '../types';
 import Modal from './Modal';
 import Button from './Button';
-
-interface User {
-  id: string;
-  name: string;
-}
 
 interface CardEditModalProps {
   card: Partial<Card> | null;
@@ -32,7 +27,7 @@ const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, on
 
   const handleSave = () => {
     if (editTitle.trim() && card && card._id) {
-      const assigneeName = editAssignee ? users.find(user => user.id === editAssignee)?.name || '未分配' : '未分配';
+      const assigneeName = editAssignee ? users.find(user => user._id === editAssignee)?.name || '未分配' : '未分配';
       onSave(card._id, {
         title: editTitle,
         content: editContent,
@@ -94,7 +89,7 @@ const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, on
         >
           <option value="">未分配</option>
           {users.map(user => (
-            <option key={user.id} value={user.id}>{user.name}</option>
+            <option key={user._id} value={user._id}>{user.name}</option>
           ))}
         </select>
       </div>

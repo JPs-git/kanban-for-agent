@@ -3,24 +3,26 @@ import UserForm from "./UserForm";
 import UserDeleteConfirm from "./UserDeleteConfirm";
 import Button from "./Button";
 import Modal from "./Modal";
-
-interface User {
-  id: string;
-  name: string;
-}
+import type { User } from "../types";
 
 interface UserManagementProps {
   isOpen: boolean;
   onClose: () => void;
   users: User[];
-  onUsersChange: (users: User[]) => void;
+  onAddUser: (name: string) => Promise<void>;
+  onUpdateUser: (id: string, name: string) => Promise<void>;
+  onDeleteUser: (id: string) => Promise<void>;
+  loading?: boolean;
 }
 
 const UserManagement: React.FC<UserManagementProps> = ({
   isOpen,
   onClose,
   users,
-  onUsersChange,
+  onAddUser,
+  onUpdateUser,
+  onDeleteUser,
+  loading = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"id" | "name">("id");
@@ -35,34 +37,27 @@ const UserManagement: React.FC<UserManagementProps> = ({
     )
     .sort((a, b) => {
       if (sortBy === "id") {
-        return a.id.localeCompare(b.id);
+        return a._id.localeCompare(b._id);
       } else {
         return a.name.localeCompare(b.name);
       }
     });
 
   // 处理添加用户
-  const handleAddUser = (user: User) => {
-    // 自动生成唯一id
-    const newUser = {
-      ...user,
-      id: Math.random().toString(36).substring(2, 9),
-    };
-    onUsersChange([...users, newUser]);
+  const handleAddUser = async (name: string) => {
+    await onAddUser(name);
     setIsAddFormOpen(false);
   };
 
   // 处理编辑用户
-  const handleEditUser = (updatedUser: User) => {
-    onUsersChange(
-      users.map((user) => (user.id === updatedUser.id ? updatedUser : user))
-    );
+  const handleEditUser = async (id: string, name: string) => {
+    await onUpdateUser(id, name);
     setEditingUser(null);
   };
 
   // 处理删除用户
-  const handleDeleteUser = (userId: string) => {
-    onUsersChange(users.filter((user) => user.id !== userId));
+  const handleDeleteUser = async (userId: string) => {
+    await onDeleteUser(userId);
     setUserToDelete(null);
   };
 
@@ -88,36 +83,40 @@ const UserManagement: React.FC<UserManagementProps> = ({
         </select>
       </div>
 
-      <div className="user-list">
-        {filteredAndSortedUsers.length === 0 ? (
-          <div className="empty-state">暂无用户</div>
-        ) : (
-          filteredAndSortedUsers.map((user) => (
-            <div key={user.id} className="user-item">
-              <div className="user-info">
-                <span className="user-id">ID: {user.id}</span>
-                <span className="user-name">{user.name}</span>
+      {loading ? (
+        <div className="loading">加载中...</div>
+      ) : (
+        <div className="user-list">
+          {filteredAndSortedUsers.length === 0 ? (
+            <div className="empty-state">暂无用户</div>
+          ) : (
+            filteredAndSortedUsers.map((user) => (
+              <div key={user._id} className="user-item">
+                <div className="user-info">
+                  <span className="user-id">ID: {user._id}</span>
+                  <span className="user-name">{user.name}</span>
+                </div>
+                <div className="user-actions">
+                  <Button
+                    variant="primary"
+                    size="small"
+                    onClick={() => setEditingUser(user)}
+                  >
+                    编辑
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="small"
+                    onClick={() => setUserToDelete(user)}
+                  >
+                    删除
+                  </Button>
+                </div>
               </div>
-              <div className="user-actions">
-                <Button
-                  variant="primary"
-                  size="small"
-                  onClick={() => setEditingUser(user)}
-                >
-                  编辑
-                </Button>
-                <Button
-                  variant="danger"
-                  size="small"
-                  onClick={() => setUserToDelete(user)}
-                >
-                  删除
-                </Button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       <Button variant="success" onClick={() => setIsAddFormOpen(true)}>
         添加用户
@@ -135,7 +134,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
       {/* 编辑用户表单 */}
       {editingUser && (
         <UserForm
-          onSave={handleEditUser}
+          onSave={(name) => handleEditUser(editingUser._id, name)}
           onCancel={() => setEditingUser(null)}
           user={editingUser}
         />
@@ -145,7 +144,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
       {userToDelete && (
         <UserDeleteConfirm
           user={userToDelete}
-          onConfirm={() => handleDeleteUser(userToDelete.id)}
+          onConfirm={() => handleDeleteUser(userToDelete._id)}
           onCancel={() => setUserToDelete(null)}
         />
       )}

@@ -6,7 +6,7 @@
 
 ## 2. 基础信息
 
-- **API基础路径**: `http://localhost:3000/api`
+- **API基础路径**: `http://localhost:8082/api`
 - **内容类型**: `application/json`
 - **认证**: 无（MVP阶段）
 
@@ -39,6 +39,8 @@
     "title": "测试卡片",
     "content": "这是一个测试卡片",
     "status": "TODO",
+    "assignee": "user123",
+    "assigneeName": "张三",
     "createdAt": "2026-03-10T03:12:15.078Z",
     "updatedAt": "2026-03-10T03:12:15.078Z",
     "__v": 0
@@ -56,8 +58,10 @@
   | 字段 | 类型 | 必填 | 描述 |
   |------|------|------|------|
   | title | string | 是 | 卡片标题 |
-  | content | string | 是 | 卡片内容 |
+  | content | string | 否 | 卡片内容 |
   | status | string | 否 | 卡片状态（默认：TODO） |
+  | assignee | string | 否 | 负责人ID |
+  | assigneeName | string | 否 | 负责人姓名 |
 
 **状态枚举**:
 - TODO: 待处理
@@ -74,7 +78,9 @@
 {
   "title": "新任务",
   "content": "这是一个新任务的描述",
-  "status": "TODO"
+  "status": "TODO",
+  "assignee": "user123",
+  "assigneeName": "张三"
 }
 ```
 
@@ -85,6 +91,8 @@
   "title": "新任务",
   "content": "这是一个新任务的描述",
   "status": "TODO",
+  "assignee": "user123",
+  "assigneeName": "张三",
   "createdAt": "2026-03-10T03:30:00.000Z",
   "updatedAt": "2026-03-10T03:30:00.000Z",
   "__v": 0
@@ -107,6 +115,8 @@
   | title | string | 否 | 卡片标题 |
   | content | string | 否 | 卡片内容 |
   | status | string | 否 | 卡片状态 |
+  | assignee | string | 否 | 负责人ID |
+  | assigneeName | string | 否 | 负责人姓名 |
 
 **响应**: 
 - **状态码**: 200 OK
@@ -116,7 +126,9 @@
 ```json
 {
   "title": "更新的任务",
-  "status": "IN_PROGRESS"
+  "status": "IN_PROGRESS",
+  "assignee": "user456",
+  "assigneeName": "李四"
 }
 ```
 
@@ -127,6 +139,8 @@
   "title": "更新的任务",
   "content": "这是一个测试卡片",
   "status": "IN_PROGRESS",
+  "assignee": "user456",
+  "assigneeName": "李四",
   "createdAt": "2026-03-10T03:12:15.078Z",
   "updatedAt": "2026-03-10T03:35:00.000Z",
   "__v": 0
@@ -179,6 +193,8 @@
 | title | string | 卡片标题 |
 | content | string | 卡片内容 |
 | status | string | 卡片状态 |
+| assignee | string | 负责人ID |
+| assigneeName | string | 负责人姓名 |
 | createdAt | string | 创建时间（ISO格式） |
 | updatedAt | string | 更新时间（ISO格式） |
 | __v | number | 版本号 |
@@ -221,7 +237,9 @@ fetch('http://localhost:3000/api/cards', {
   body: JSON.stringify({
     title: '新任务',
     content: '任务描述',
-    status: 'TODO'
+    status: 'TODO',
+    assignee: 'user123',
+    assigneeName: '张三'
   }),
 })
   .then(response => response.json())
@@ -232,7 +250,9 @@ fetch('http://localhost:3000/api/cards', {
 axios.post('http://localhost:3000/api/cards', {
   title: '新任务',
   content: '任务描述',
-  status: 'TODO'
+  status: 'TODO',
+  assignee: 'user123',
+  assigneeName: '张三'
 })
   .then(response => console.log(response.data))
   .catch(error => console.error('Error:', error));
@@ -248,7 +268,9 @@ fetch('http://localhost:3000/api/cards/69af8c0fc6fcbe2a44f72817', {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    status: 'DONE'
+    status: 'DONE',
+    assignee: 'user456',
+    assigneeName: '李四'
   }),
 })
   .then(response => response.json())
@@ -257,7 +279,9 @@ fetch('http://localhost:3000/api/cards/69af8c0fc6fcbe2a44f72817', {
 
 // 使用axios
 axios.put('http://localhost:3000/api/cards/69af8c0fc6fcbe2a44f72817', {
-  status: 'DONE'
+  status: 'DONE',
+  assignee: 'user456',
+  assigneeName: '李四'
 })
   .then(response => console.log(response.data))
   .catch(error => console.error('Error:', error));
@@ -292,4 +316,4 @@ axios.delete('http://localhost:3000/api/cards/69af8c0fc6fcbe2a44f72817')
 ## 9. 版本信息
 
 - **API版本**: 1.0.0
-- **最后更新**: 2026-03-10
+- **最后更新**: 2026-03-12
