@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import { connectDB } from './config/db';
-import cardRoutes from './routes/cardRoutes';
+import { connectDB } from './config/db.js';
+import cardRoutes from './routes/cardRoutes.js';
 
 export const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,7 +31,5 @@ const startServer = async () => {
   }
 };
 
-// 只有在直接运行时才启动服务器
-if (require.main === module) {
-  startServer();
-}
+// 启动服务器
+startServer();
