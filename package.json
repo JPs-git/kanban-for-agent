@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx concurrently --names \"frontend,backend\" --prefix-colors \"green,blue\" \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
+    "start:prod": "docker-compose -f docker-compose.prod.yml up -d",
     "install": "cd frontend && npm install && cd ../backend && npm install",
     "install:concurrently": "npm install",
     "build": "cd frontend && npm run build && cd ../backend && npm run build",

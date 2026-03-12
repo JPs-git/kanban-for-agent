@@ -62,7 +62,7 @@ const Card: React.FC<CardProps> = ({ card, onDelete, onEdit }) => {
         <span className="assignee-name">{getAssigneeDisplayName()}</span>
       </div>
       <div className="card-footer">
-        <span className="card-status">
+        <span className={`card-status status-${card.status?.toLowerCase()}`}>
           {statusLabels[card.status as CardStatus]}
         </span>
       </div>
