@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  # MongoDB 测试服务
+  mongo:
+    image: mongo:5.0
+    container_name: kanban-mongo-test
+    volumes:
+      - mongo-data-test:/data/db
+    networks:
+      - kanban-network-test
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kanban-backend-test
+    environment:
+      - NODE_ENV=test
+      - MONGODB_TEST_URI=mongodb://mongo:27017/kanban-test
+      - PORT=3000
+    depends_on:
+      - mongo
+    networks:
+      - kanban-network-test
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kanban-frontend-test
+    ports:
+      - "8081:80"
+    networks:
+      - kanban-network-test
+
+volumes:
+  mongo-data-test:
+
+networks:
+  kanban-network-test:
+    driver: bridge

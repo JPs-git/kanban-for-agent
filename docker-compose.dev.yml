@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # MongoDB 服务
+  mongo:
+    image: mongo:5.0
+    container_name: kanban-mongo-dev
+    volumes:
+      - mongo-data-dev:/data/db
+    networks:
+      - kanban-network
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kanban-backend-dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongo:27017/kanban
+      - PORT=3000
+    depends_on:
+      - mongo
+    networks:
+      - kanban-network
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kanban-frontend-dev
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - kanban-network
+
+volumes:
+  mongo-data-dev:
+
+networks:
+  kanban-network:
+    driver: bridge
