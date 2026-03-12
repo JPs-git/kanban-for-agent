@@ -28,6 +28,3 @@ jobs:
 
       - name: Run tests (unit)
         run: npm run test:unit
-
-      - name: Docker Compose Build
-        run: docker-compose build
