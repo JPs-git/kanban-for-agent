@@ -1,0 +1,58 @@
+services:
+  # MongoDB 服务
+  mongo:
+    image: mongo:4.4
+    container_name: kanban-mongo-prod
+    volumes:
+      - mongo-data-prod:/data/db
+    networks:
+      - kanban-network-prod
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: SecurePassword123!
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kanban-backend-prod
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://root:SecurePassword123!@mongo:27017/kanban?authSource=admin
+      PORT: 3000
+    depends_on:
+      - mongo
+    networks:
+      - kanban-network-prod
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kanban-frontend-prod
+    ports:
+      - "8082:80"
+    networks:
+      - kanban-network-prod
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+volumes:
+  mongo-data-prod:
+
+networks:
+  kanban-network-prod:
+    driver: bridge

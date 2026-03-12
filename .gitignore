@@ -1,6 +1,7 @@
 node_modules
 .DS_Store
 *.log
+.env.production
 
 # Cypress test screenshots
 frontend/cypress/screenshots/
