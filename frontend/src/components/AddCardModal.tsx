@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CardStatus } from '../types';
 import type { CardCreate, User } from '../types';
 import Modal from './Modal';
@@ -20,17 +20,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
     assigneeName: '未分配',
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      setNewCard({
-        title: '',
-        content: '',
-        status: CardStatus.TODO,
-        assignee: '',
-        assigneeName: '未分配',
-      });
-    }
-  }, [isOpen]);
+
 
   const handleSubmit = () => {
     if (newCard.title) {
