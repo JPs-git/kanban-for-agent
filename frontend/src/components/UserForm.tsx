@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-}
+import type { User } from '../types';
 
 interface UserFormProps {
   user: User | null;
-  onSave: (user: User) => void;
+  onSave: (name: string) => void;
   onCancel: () => void;
 }
 
 const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
-  const id = user?.id || '';
   const [name, setName] = useState(() => user?.name || '');
-  const [errors, setErrors] = useState<{ id?: string; name?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string }>({});
 
   // 表单验证
   const validateForm = (): boolean => {
@@ -32,7 +27,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      onSave({ id, name });
+      onSave(name.trim());
     }
   };
 
@@ -52,9 +47,10 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSave, onCancel }) => {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="请输入用户名"
               className={errors.name ? 'error' : ''}
             />
-            {errors.name && <div className="error-message">{errors.name}</div>}
+            {errors.name && <span className="error-message">{errors.name}</span>}
           </div>
           
           <div className="form-actions">

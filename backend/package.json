@@ -4,14 +4,13 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev src/server.ts",
+    "dev": "tsx src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "lint": "eslint .",
-    "ci": "npx rimraf node_modules dist && npm install && npm run lint && npm run build && npm test"
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
+    "test:unit:coverage": "jest --coverage",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -37,6 +36,7 @@
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.6.2"
   }
 }

@@ -8,19 +8,24 @@ services:
     networks:
       - kanban-network-prod
     restart: always
+    env_file:
+      - .env.production
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: SecurePassword123!
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
 
   # 后端服务
   backend:
+    image: kanban-backend-prod:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: kanban-backend-prod
+    env_file:
+      - .env.production
     environment:
       NODE_ENV: production
-      MONGODB_URI: mongodb://root:SecurePassword123!@mongo:27017/kanban?authSource=admin
+      MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-password}@mongo:27017/kanban?authSource=admin
       PORT: 3000
     depends_on:
       - mongo
@@ -35,6 +40,7 @@ services:
 
   # 前端服务
   frontend:
+    image: kanban-frontend-prod:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile

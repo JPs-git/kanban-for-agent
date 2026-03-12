@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Card, CardStatus } from '../models/Card';
+import { Card, CardStatus } from '../models/Card.js';
 
 export const getCards = async (req: Request, res: Response) => {
   try {

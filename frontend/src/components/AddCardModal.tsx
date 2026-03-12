@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CardStatus } from '../types';
-import type { CardCreate } from '../types';
+import type { CardCreate, User } from '../types';
 import Modal from './Modal';
 import Button from './Button';
 
@@ -8,7 +8,7 @@ interface AddCardModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (card: CardCreate) => void;
-  users: Array<{ id: string; name: string }>;
+  users: User[];
 }
 
 const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, users }) => {
@@ -20,10 +20,12 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
     assigneeName: '未分配',
   });
 
+
+
   const handleSubmit = () => {
     if (newCard.title) {
       const assigneeName = newCard.assignee
-        ? users.find((user) => user.id === newCard.assignee)?.name || '未分配'
+        ? users.find((user) => user._id === newCard.assignee)?.name || '未分配'
         : '未分配';
       onAdd({
         ...newCard,
@@ -98,7 +100,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
         >
           <option value="">未分配</option>
           {users.map((user) => (
-            <option key={user.id} value={user.id}>
+            <option key={user._id} value={user._id}>
               {user.name}
             </option>
           ))}
