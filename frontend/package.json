@@ -8,12 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest watch",
-    "test:coverage": "vitest run --coverage",
-    "e2e": "cypress open",
-    "e2e:run": "cypress run",
-    "ci": "npm install && npm run lint && npm run build && npm test"
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest watch",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:e2e:open": "cypress open",
+    "test:e2e": "cypress run"
   },
   "dependencies": {
     "react": "^19.2.0",
