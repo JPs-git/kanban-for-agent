@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { Card, User } from '../types';
 import { CardStatus } from '../types';
 import Modal from './Modal';
@@ -13,21 +13,27 @@ interface CardEditModalProps {
 }
 
 const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave, users }) => {
-  const [editTitle, setEditTitle] = useState(card?.title || '');
-  const [editContent, setEditContent] = useState(card?.content || '');
-  const [editStatus, setEditStatus] = useState<CardStatus>(card?.status || CardStatus.TODO);
-  const [editAssignee, setEditAssignee] = useState(card?.assignee || '');
+  // 当 card 变化时，重置状态
+  const [editTitle, setEditTitle] = useState(() => card?.title || '');
+  const [editContent, setEditContent] = useState(() => card?.content || '');
+  const [editStatus, setEditStatus] = useState<CardStatus>(() => card?.status || CardStatus.TODO);
+  const [editAssignee, setEditAssignee] = useState(() => card?.assignee || '');
 
-  // 当卡片数据变化时更新状态
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    if (card) {
+  // 当 card prop 变化时，重新初始化状态
+  if (card) {
+    if (editTitle !== (card.title || '')) {
       setEditTitle(card.title || '');
+    }
+    if (editContent !== (card.content || '')) {
       setEditContent(card.content || '');
+    }
+    if (editStatus !== (card.status || CardStatus.TODO)) {
       setEditStatus(card.status || CardStatus.TODO);
+    }
+    if (editAssignee !== (card.assignee || '')) {
       setEditAssignee(card.assignee || '');
     }
-  }, [card]);
+  }
 
   const statusLabels: Record<CardStatus, string> = {
     [CardStatus.TODO]: '待处理',
