@@ -41,7 +41,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
         ...newCard,
         assigneeName: assigneeName,
       });
-      onClose();
+      handleClose();
     }
   };
 
