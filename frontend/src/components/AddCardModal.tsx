@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CardStatus } from '../types';
 import type { CardCreate, User } from '../types';
 import Modal from './Modal';
@@ -20,7 +20,19 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
     assigneeName: '未分配',
   });
 
-
+  // 当模态框打开时重置状态
+  useEffect(() => {
+    if (isOpen) {
+      // 使用函数式更新来避免直接在 effect 中调用 setState
+      setNewCard(() => ({
+        title: '',
+        content: '',
+        status: CardStatus.TODO,
+        assignee: '',
+        assigneeName: '未分配',
+      }));
+    }
+  }, [isOpen]);
 
   const handleSubmit = () => {
     if (newCard.title) {

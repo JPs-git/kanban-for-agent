@@ -42,9 +42,9 @@
 
 3. **生成用户反馈文档**
 
-   - 创建用户反馈文档，文件名根据版本号格式：`v[版本号]_feedback.md`
-   - 如果有已经存在, 在后面追加内容，不覆盖
-   - 文档存放在 `c:\Users\Administrator\Projects\kanban-for-agent\.trae\documents\feedback` 目录
+   - 创建用户反馈文档，文件名根据版本号格式：`feedback.md`
+   - 如果目录下已经存在, 在后面追加内容，不覆盖
+   - 文档存放在 `documents/v[版本号]`目录, 例如documents/v0.5/feedback.md
    - 文档内容包括：
      - 概览：任务数量、类型分布
      - 详细任务列表：每个任务的标题、内容、状态
@@ -61,7 +61,7 @@
    - 为每个已完成的 Trae 任务创建对应的验收卡片
    - 标题格式：`[原任务标题] 功能验收`
    - 内容：简要描述验收要点
-   - 状态：设置为 "TODO"
+   - 状态：设置为 ""IN_PROGRESS""
    - 分配给：Starbow
    - 调用 POST /api/cards 接口创建卡片
 
