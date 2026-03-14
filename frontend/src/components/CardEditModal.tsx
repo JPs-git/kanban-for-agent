@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { Card, User } from '../types';
 import { CardStatus } from '../types';
 import Modal from './Modal';
@@ -13,21 +13,11 @@ interface CardEditModalProps {
 }
 
 const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave, users }) => {
+  // 直接从 card 属性初始化状态，当组件重新渲染时会自动更新
   const [editTitle, setEditTitle] = useState(card?.title || '');
   const [editContent, setEditContent] = useState(card?.content || '');
   const [editStatus, setEditStatus] = useState<CardStatus>(card?.status || CardStatus.TODO);
   const [editAssignee, setEditAssignee] = useState(card?.assignee || '');
-
-  // 当卡片数据变化时更新状态
-  useEffect(() => {
-    if (card) {
-      // 使用函数式更新来避免直接在 effect 中调用 setState
-      setEditTitle(() => card.title || '');
-      setEditContent(() => card.content || '');
-      setEditStatus(() => card.status || CardStatus.TODO);
-      setEditAssignee(() => card.assignee || '');
-    }
-  }, [card]);
 
   const statusLabels: Record<CardStatus, string> = {
     [CardStatus.TODO]: '待处理',
