@@ -1,101 +1,92 @@
 @echo off
-echo =============================================
-echo       Kanban for Agent 一键安装脚本
-echo =============================================
+echo ================================
+echo   Kanban for Agent Installer
+echo ================================
 echo.
 
-rem 检查 Git 是否安装
 git --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ERROR: Git 未安装
-    echo 请先安装 Git: https://git-scm.com/download/win
+    echo ERROR: Git is not installed
+    echo Please install Git first: https://git-scm.com/download/win
     pause
     exit /b 1
 )
-echo OK: Git 已安装
+echo OK: Git is installed
 
-rem 检查 Node.js 是否安装
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ERROR: Node.js 未安装
-    echo 请先安装 Node.js: https://nodejs.org/zh-cn/download/
+    echo ERROR: Node.js is not installed
+    echo Please install Node.js: https://nodejs.org/
     pause
     exit /b 1
 )
-echo OK: Node.js 已安装
-for /f "delims=" %%v in ('node --version') do set nodeVersion=%%v
-echo Node.js 版本: %nodeVersion%
+echo OK: Node.js is installed
 
-rem 设置安装目录
-set "InstallDir=C:\kanban-for-agent"
-set /p "inputDir=请输入安装目录 (默认: C:\kanban-for-agent): "
-if not "%inputDir%"=="" set "InstallDir=%inputDir%"
+set "INSTALL_DIR=C:\kanban-for-agent"
+set /p "INSTALL_DIR=Enter install directory (default: C:\kanban-for-agent): "
 
 echo.
-echo 安装目录: %InstallDir%
+echo Install directory: %INSTALL_DIR%
 
-rem 创建安装目录
-if exist "%InstallDir%" (
-    echo WARNING: 目录已存在，将覆盖现有文件
+if exist "%INSTALL_DIR%" (
+    echo WARNING: Directory already exists
 ) else (
-    mkdir "%InstallDir%"
-    echo OK: 创建目录成功
+    mkdir "%INSTALL_DIR%"
+    echo OK: Directory created
 )
 
-rem 克隆仓库
 echo.
-echo 正在克隆仓库...
+echo Cloning repository...
 
-if exist "%InstallDir%\.git" (
-    echo 检测到现有仓库，执行 git pull...
-    cd /d "%InstallDir%"
+if exist "%INSTALL_DIR%\.git" (
+    echo Found existing repo, updating...
+    cd /d "%INSTALL_DIR%"
     git pull origin master
 ) else (
-    cd /d "%InstallDir%\.."
-    git clone https://github.com/JPs-git/kanban-for-agent.git "%InstallDir%\.."
+    for %%i in ("%INSTALL_DIR%") do set "PARENT_DIR=%%~dpi"
+    cd /d "%PARENT_DIR%"
+    git clone https://github.com/JPs-git/kanban-for-agent.git "%INSTALL_DIR%"
 )
 
 if %errorlevel% neq 0 (
-    echo ERROR: 克隆仓库失败
+    echo ERROR: Failed to clone repository
     pause
     exit /b 1
 )
-echo OK: 仓库克隆成功
+echo OK: Repository cloned
 
-rem 安装 CLI
 echo.
-echo 正在安装 CLI...
+echo Installing CLI...
 
-cd /d "%InstallDir%\kanban-cli"
+cd /d "%INSTALL_DIR%\kanban-cli"
 npm install
 if %errorlevel% neq 0 (
-    echo ERROR: CLI 依赖安装失败
+    echo ERROR: Failed to install CLI dependencies
     pause
     exit /b 1
 )
 
 npm link
 if %errorlevel% neq 0 (
-    echo ERROR: CLI 链接失败
+    echo ERROR: Failed to link CLI
     pause
     exit /b 1
 )
-echo OK: CLI 安装成功
+echo OK: CLI installed
 
-rem 完成
 echo.
-echo =============================================
-echo          安装完成！
-echo =============================================
+echo ================================
+echo   Installation Complete!
+echo ================================
 echo.
-echo 使用方法:
-echo   kanban deploy     - 部署应用（首次使用）
-echo   kanban start      - 启动服务
-echo   kanban stop       - 停止服务
-echo   kanban status     - 查看状态
-echo   kanban restart    - 重启服务
-echo   kanban logs       - 查看日志
+echo Commands:
+echo   kanban deploy     - Deploy application
+echo   kanban start      - Start service
+echo   kanban stop       - Stop service
+echo   kanban status     - Check status
+echo   kanban restart    - Restart service
+echo   kanban logs       - View logs
 echo.
-echo 首次部署请执行: kanban deploy
+echo Run 'kanban deploy' to start deployment
 echo.
 pause
