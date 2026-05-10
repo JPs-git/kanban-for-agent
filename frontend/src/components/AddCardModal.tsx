@@ -20,7 +20,17 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
     assigneeName: '未分配',
   });
 
-
+  // 自定义关闭函数，先重置状态再调用传入的 onClose
+  const handleClose = () => {
+    setNewCard({
+      title: '',
+      content: '',
+      status: CardStatus.TODO,
+      assignee: '',
+      assigneeName: '未分配',
+    });
+    onClose();
+  };
 
   const handleSubmit = () => {
     if (newCard.title) {
@@ -31,7 +41,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
         ...newCard,
         assigneeName: assigneeName,
       });
-      onClose();
+      handleClose();
     }
   };
 
@@ -43,7 +53,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="添加卡片" width="500px">
+    <Modal isOpen={isOpen} onClose={handleClose} title="添加卡片" width="500px">
       <div className="form-group">
         <label htmlFor="add-title">标题</label>
         <input
@@ -107,7 +117,7 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
         </select>
       </div>
       <div className="modal-footer">
-        <Button variant="secondary" onClick={onClose}>取消</Button>
+        <Button variant="secondary" onClick={handleClose}>取消</Button>
         <Button variant="success" onClick={handleSubmit}>保存</Button>
       </div>
     </Modal>

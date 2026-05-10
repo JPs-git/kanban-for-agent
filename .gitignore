@@ -11,3 +11,9 @@ backend/dist
 frontend/dist
 frontend/coverage
 backend/coverage
+
+# SQLite databases
+backend/data/
+
+# Trae IDE configuration
+.trae/

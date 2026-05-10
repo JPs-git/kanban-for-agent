@@ -1,16 +1,16 @@
 import { Request, Response } from 'express';
 import { Card, CardStatus } from '../models/Card.js';
 
-export const getCards = async (req: Request, res: Response) => {
+export const getCards = (req: Request, res: Response) => {
   try {
-    const cards = await Card.find();
+    const cards = Card.find();
     res.status(200).json(cards);
   } catch {
     res.status(500).json({ error: 'Failed to get cards' });
   }
 };
 
-export const createCard = async (req: Request, res: Response) => {
+export const createCard = (req: Request, res: Response) => {
   try {
     const { title, content, status, assignee, assigneeName } = req.body;
     
@@ -18,22 +18,20 @@ export const createCard = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Title is required' });
     }
     
-    const card = new Card({
+    const savedCard = Card.create({
       title,
       content,
       status: status || CardStatus.TODO,
       assignee,
       assigneeName
     });
-    
-    const savedCard = await card.save();
     res.status(201).json(savedCard);
   } catch {
     res.status(500).json({ error: 'Failed to create card' });
   }
 };
 
-export const updateCard = async (req: Request, res: Response) => {
+export const updateCard = (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { title, content, status, assignee, assigneeName } = req.body;
@@ -41,10 +39,10 @@ export const updateCard = async (req: Request, res: Response) => {
     console.log('Updating card with id:', id);
     console.log('Update data:', { title, content, status, assignee, assigneeName });
     
-    const card = await Card.findByIdAndUpdate(
-      id,
-      { title, content, status, assignee, assigneeName },
-      { returnDocument: 'after', runValidators: true }
+    const cardId = Array.isArray(id) ? id[0] : id;
+    const card = Card.findByIdAndUpdate(
+      parseInt(cardId),
+      { title, content, status, assignee, assigneeName }
     );
     
     console.log('Updated card:', card);
@@ -60,11 +58,12 @@ export const updateCard = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteCard = async (req: Request, res: Response) => {
+export const deleteCard = (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
-    const card = await Card.findByIdAndDelete(id);
+    const cardId = Array.isArray(id) ? id[0] : id;
+    const card = Card.findByIdAndDelete(parseInt(cardId));
     
     if (!card) {
       return res.status(404).json({ error: 'Card not found' });

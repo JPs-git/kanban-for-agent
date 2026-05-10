@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Card, User } from '../types';
 import { CardStatus } from '../types';
 import Modal from './Modal';
@@ -17,6 +17,18 @@ const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, on
   const [editContent, setEditContent] = useState(card?.content || '');
   const [editStatus, setEditStatus] = useState<CardStatus>(card?.status || CardStatus.TODO);
   const [editAssignee, setEditAssignee] = useState(card?.assignee || '');
+
+  // 当卡片数据变化时更新状态
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (card) {
+      setEditTitle(card.title || '');
+      setEditContent(card.content || '');
+      setEditStatus(card.status || CardStatus.TODO);
+      setEditAssignee(card.assignee || '');
+    }
+  }, [card]); // 当 card 变化时更新
 
   const statusLabels: Record<CardStatus, string> = {
     [CardStatus.TODO]: '待处理',
