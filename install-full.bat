@@ -43,8 +43,7 @@ if exist "%INSTALL_DIR%\.git" (
     cd /d "%INSTALL_DIR%"
     git pull origin master
 ) else (
-    for %%i in ("%INSTALL_DIR%") do set "PARENT_DIR=%%~dpi"
-    cd /d "%PARENT_DIR%"
+    rmdir /s /q "%INSTALL_DIR%" 2>nul
     git clone https://github.com/JPs-git/kanban-for-agent.git "%INSTALL_DIR%"
 )
 
@@ -58,7 +57,15 @@ echo OK: Repository cloned
 echo.
 echo Installing CLI...
 
+if not exist "%INSTALL_DIR%\kanban-cli" (
+    echo ERROR: kanban-cli directory not found
+    pause
+    exit /b 1
+)
+
 cd /d "%INSTALL_DIR%\kanban-cli"
+echo Current directory: %cd%
+
 npm install
 if %errorlevel% neq 0 (
     echo ERROR: Failed to install CLI dependencies
