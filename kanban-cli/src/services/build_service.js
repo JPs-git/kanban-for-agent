@@ -26,7 +26,8 @@ class BuildService {
 
   isNpmAvailable() {
     try {
-      const result = spawnSync('npm', ['--version'], {
+      const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+      const result = spawnSync(npmCmd, ['--version'], {
         stdio: ['ignore', 'pipe', 'ignore']
       });
       if (result.status === 0) {
@@ -53,10 +54,11 @@ class BuildService {
 
   installBackendDeps() {
     const backendPath = path.join(this.repoPath, 'backend');
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     logger.info('Installing backend dependencies...');
 
     try {
-      const result = spawnSync('npm', ['install'], {
+      const result = spawnSync(npmCmd, ['install'], {
         cwd: backendPath,
         stdio: ['ignore', 'pipe', 'pipe']
       });
@@ -75,10 +77,11 @@ class BuildService {
 
   buildBackend() {
     const backendPath = path.join(this.repoPath, 'backend');
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     logger.info('Building backend...');
 
     try {
-      const result = spawnSync('npm', ['run', 'build'], {
+      const result = spawnSync(npmCmd, ['run', 'build'], {
         cwd: backendPath,
         stdio: ['ignore', 'pipe', 'pipe']
       });
@@ -97,10 +100,11 @@ class BuildService {
 
   installFrontendDeps() {
     const frontendPath = path.join(this.repoPath, 'frontend');
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     logger.info('Installing frontend dependencies...');
 
     try {
-      const result = spawnSync('npm', ['install'], {
+      const result = spawnSync(npmCmd, ['install'], {
         cwd: frontendPath,
         stdio: ['ignore', 'pipe', 'pipe']
       });
@@ -120,11 +124,12 @@ class BuildService {
   buildFrontend() {
     const frontendPath = path.join(this.repoPath, 'frontend');
     const publicPath = path.join(this.repoPath, 'backend', 'dist', 'public');
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
     logger.info('Building frontend...');
 
     try {
-      const result = spawnSync('npm', ['run', 'build'], {
+      const result = spawnSync(npmCmd, ['run', 'build'], {
         cwd: frontendPath,
         stdio: ['ignore', 'pipe', 'pipe']
       });
