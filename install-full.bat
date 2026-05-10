@@ -22,8 +22,8 @@ if %errorlevel% neq 0 (
 )
 echo OK: Node.js is installed
 
-set "INSTALL_DIR=C:\kanban-for-agent"
-set /p "INSTALL_DIR=Enter install directory (default: C:\kanban-for-agent): "
+set "INSTALL_DIR=%USERPROFILE%\kanban-for-agent"
+set /p "INSTALL_DIR=Enter install directory (default: %USERPROFILE%\kanban-for-agent): "
 
 echo.
 echo Install directory: %INSTALL_DIR%
