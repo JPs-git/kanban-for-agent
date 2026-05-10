@@ -41,10 +41,11 @@ echo Cloning repository...
 if exist "%INSTALL_DIR%\.git" (
     echo Found existing repo, updating...
     cd /d "%INSTALL_DIR%"
-    git pull origin master
+    git checkout patch/cli-fix
+    git pull origin patch/cli-fix
 ) else (
     rmdir /s /q "%INSTALL_DIR%" 2>nul
-    git clone https://github.com/JPs-git/kanban-for-agent.git "%INSTALL_DIR%"
+    git clone -b patch/cli-fix https://github.com/JPs-git/kanban-for-agent.git "%INSTALL_DIR%"
 )
 
 if %errorlevel% neq 0 (
