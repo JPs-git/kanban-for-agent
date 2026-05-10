@@ -1,41 +1,47 @@
-import express from 'express';
-import cors from 'cors';
-import { connectDB } from './config/db.js';
-import cardRoutes from './routes/cardRoutes.js';
-import userRoutes from './routes/userRoutes.js';
+import express from "express";
+import cors from "cors";
+import path from "path";
+import { connectDB } from "./config/db.js";
+import cardRoutes from "./routes/cardRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+
+declare const __dirname: string;
+const currentDir =
+  typeof __dirname !== "undefined" ? __dirname : path.resolve();
 
 export const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 中间件
 app.use(cors());
 app.use(express.json());
 
-// 健康检查
-app.get('/api', (req, res) => {
-  res.json({ message: 'Kanban API is running' });
+const staticPath = path.join(currentDir, "public");
+
+app.use(express.static(staticPath));
+
+app.get("/api", (req, res) => {
+  res.json({ message: "Kanban API is running" });
 });
 
-// 卡片路由
-app.use('/api/cards', cardRoutes);
+app.use("/api/cards", cardRoutes);
+app.use("/api/users", userRoutes);
 
-// 用户路由
-app.use('/api/users', userRoutes);
+app.get("*", (req, res) => {
+  res.sendFile(path.join(staticPath, "index.html"));
+});
 
-// 启动服务器
-const startServer = async () => {
+const startServer = () => {
   try {
-    await connectDB();
+    connectDB();
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error('Error starting server:', error);
+    console.error("Error starting server:", error);
     process.exit(1);
   }
 };
 
-// 只在非测试环境下启动服务器
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   startServer();
 }

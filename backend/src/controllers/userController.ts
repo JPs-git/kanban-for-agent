@@ -1,16 +1,16 @@
 import { Request, Response } from 'express';
 import { User } from '../models/User.js';
 
-export const getUsers = async (req: Request, res: Response) => {
+export const getUsers = (req: Request, res: Response) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
+    const users = User.find();
     res.status(200).json(users);
   } catch {
     res.status(500).json({ error: 'Failed to get users' });
   }
 };
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = (req: Request, res: Response) => {
   try {
     const { name } = req.body;
     
@@ -18,18 +18,16 @@ export const createUser = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Name is required' });
     }
     
-    const user = new User({
+    const savedUser = User.create({
       name: name.trim()
     });
-    
-    const savedUser = await user.save();
     res.status(201).json(savedUser);
   } catch {
     res.status(500).json({ error: 'Failed to create user' });
   }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -38,10 +36,10 @@ export const updateUser = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Name is required' });
     }
     
-    const user = await User.findByIdAndUpdate(
-      id,
-      { name: name.trim() },
-      { returnDocument: 'after', runValidators: true }
+    const userId = Array.isArray(id) ? id[0] : id;
+    const user = User.findByIdAndUpdate(
+      parseInt(userId),
+      { name: name.trim() }
     );
     
     if (!user) {
@@ -54,11 +52,12 @@ export const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
-    const user = await User.findByIdAndDelete(id);
+    const userId = Array.isArray(id) ? id[0] : id;
+    const user = User.findByIdAndDelete(parseInt(userId));
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
