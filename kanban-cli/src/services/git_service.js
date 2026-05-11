@@ -44,6 +44,7 @@ class GitService {
         logger.info('Pull completed successfully');
         return true;
       } else {
+        logger.warn('Repository not found, cloning from remote...');
         logger.info(`Cloning repository from ${repoUrl}...`);
         const dir = path.dirname(this.repoPath);
         if (!fs.existsSync(dir)) {
