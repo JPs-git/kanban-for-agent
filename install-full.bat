@@ -23,11 +23,7 @@ if %errorlevel% neq 0 (
 echo OK: Node.js is installed
 
 set "REPO_DIR=%USERPROFILE%\.kanban-for-agent\repo"
-echo Install directory: %REPO_DIR%
-
-if exist "%REPO_DIR%" (
-    echo WARNING: Directory already exists, updating...
-)
+echo Repository directory: %REPO_DIR%
 
 echo.
 echo Cloning repository...
@@ -51,14 +47,13 @@ echo OK: Repository cloned
 echo.
 echo Installing CLI...
 
-set "CLI_DIR=%REPO_DIR%\kanban-cli"
-if not exist "%CLI_DIR%" (
+if not exist "%REPO_DIR%\kanban-cli" (
     echo ERROR: kanban-cli directory not found
     pause
     exit /b 1
 )
 
-cd /d "%CLI_DIR%"
+cd /d "%REPO_DIR%\kanban-cli"
 
 npm install
 if %errorlevel% neq 0 (

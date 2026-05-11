@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { deploy, start, stop, status, restart, logs } from './commands/index.js';
+import { deploy, update, start, stop, status, restart, logs } from './commands/index.js';
 
 program
   .version('1.0.0')
@@ -9,10 +9,17 @@ program
 
 program
   .command('deploy')
-  .description('Deploy the Kanban application from remote repository')
-  .option('--repo <url>', 'Repository URL to deploy from')
+  .description('Deploy the Kanban application from local repository')
+  .action(async () => {
+    await deploy();
+  });
+
+program
+  .command('update')
+  .description('Update the Kanban application from remote repository')
+  .option('--repo <url>', 'Repository URL to update from')
   .action(async (options) => {
-    await deploy(options.repo);
+    await update(options.repo);
   });
 
 program
