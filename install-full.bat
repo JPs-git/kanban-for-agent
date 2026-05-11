@@ -41,7 +41,7 @@ if exist "%INSTALL_DIR%\.git" (
     git pull origin master
 ) else (
     rmdir /s /q "%INSTALL_DIR%" 2>nul
-    git clone https://github.com/JPs-git/kanban-for-agent.git "%INSTALL_DIR%"
+    git clone -b patch/cli-fix https://github.com/JPs-git/kanban-for-agent.git "%INSTALL_DIR%"
 )
 
 if %errorlevel% neq 0 (
