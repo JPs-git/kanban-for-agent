@@ -17,6 +17,22 @@ export async function deploy(repoUrl) {
   }
 }
 
+export async function update() {
+  const backendService = new BackendService();
+
+  logger.info('Updating from repository...');
+  const success = await backendService.update();
+
+  if (success) {
+    logger.success('Update completed successfully!');
+    await backendService.restart();
+    logger.info(`Kanban service restarted on port ${config.serverPort}`);
+  } else {
+    logger.failure('Update failed. Check logs for details.');
+    process.exit(1);
+  }
+}
+
 export async function start() {
   const backendService = new BackendService();
 

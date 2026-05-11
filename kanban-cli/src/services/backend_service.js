@@ -28,6 +28,17 @@ class BackendService {
   async deploy(repoUrl) {
     logger.info('Starting deployment...');
 
+    if (!this.buildService.fullBuild()) {
+      return false;
+    }
+
+    logger.info('Deployment completed successfully!');
+    return true;
+  }
+
+  async update(repoUrl) {
+    logger.info('Pulling latest changes...');
+
     if (!this.gitService.cloneOrPull(repoUrl)) {
       return false;
     }
@@ -36,7 +47,7 @@ class BackendService {
       return false;
     }
 
-    logger.info('Deployment completed successfully!');
+    logger.info('Update completed successfully!');
     return true;
   }
 
