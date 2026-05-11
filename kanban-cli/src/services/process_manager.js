@@ -73,6 +73,11 @@ class ProcessManager {
 
       this.writePid(this.process.pid);
 
+      const logDir = path.join(config.logsPath);
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+      }
+
       const logStream = fs.createWriteStream(
         path.join(config.logsPath, 'backend.log'),
         { flags: 'a' }
