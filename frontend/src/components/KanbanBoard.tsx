@@ -6,6 +6,7 @@ import { CardStatus } from "../types";
 import type { Card, CardCreate } from "../types";
 import { useKanban } from "../hooks/useKanban";
 import { useUsers } from "../hooks/useUsers";
+import * as api from "../services/api";
 import StatusColumn from "./StatusColumn";
 import CardEditModal from "./CardEditModal";
 import AddCardModal from "./AddCardModal";
@@ -51,8 +52,15 @@ const KanbanBoard: React.FC = () => {
     type: "success" | "warning" | "error",
     duration: number = 3000,
   ) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, message, type, duration }]);
+    setToasts((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        message,
+        type,
+        duration,
+      },
+    ]);
   };
 
   const closeToast = (id: string) => {
@@ -79,7 +87,7 @@ const KanbanBoard: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleCardUpdate = (
+  const handleCardUpdate = async (
     id: string,
     updates: {
       title?: string;
@@ -89,18 +97,14 @@ const KanbanBoard: React.FC = () => {
       assigneeName?: string;
     },
   ) => {
-    import("../services/api").then((api) => {
-      api
-        .updateCard(id, updates)
-        .then(() => {
-          fetchCards();
-          showToast("卡片更新成功", "success");
-        })
-        .catch((error) => {
-          console.error("Failed to update card:", error);
-          showToast("卡片更新失败，请稍后重试", "error");
-        });
-    });
+    try {
+      await api.updateCard(id, updates);
+      fetchCards();
+      showToast("卡片更新成功", "success");
+    } catch (error) {
+      console.error("Failed to update card:", error);
+      showToast("卡片更新失败，请稍后重试", "error");
+    }
   };
 
   const handleModalClose = () => {
@@ -201,7 +205,11 @@ const KanbanBoard: React.FC = () => {
                 status={status}
                 cards={groupedCards[status] || []}
                 onCardDrop={handleCardDrop}
-                onDeleteCard={removeCard}
+                onDeleteCard={(id) => {
+                  removeCard(id)
+                    .then(() => showToast("卡片删除成功", "success"))
+                    .catch(() => showToast("卡片删除失败", "error"));
+                }}
                 onEditCard={handleCardEdit}
               />
             ))}
@@ -213,6 +221,11 @@ const KanbanBoard: React.FC = () => {
             isOpen={isEditModalOpen}
             onClose={handleModalClose}
             onSave={handleCardUpdate}
+            onDelete={(id) => {
+              removeCard(id)
+                .then(() => showToast("卡片删除成功", "success"))
+                .catch(() => showToast("卡片删除失败", "error"));
+            }}
             users={users}
           />
 

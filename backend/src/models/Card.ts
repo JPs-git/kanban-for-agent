@@ -20,6 +20,7 @@ interface CardRow {
 
 interface Card {
   id?: number;
+  _id: string;
   title: string;
   content?: string;
   status: CardStatus;
@@ -31,6 +32,7 @@ interface Card {
 
 const rowToCard = (row: CardRow): Card => ({
   id: row.id,
+  _id: String(row.id),
   title: row.title,
   content: row.content,
   status: row.status as CardStatus,

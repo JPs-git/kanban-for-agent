@@ -9,6 +9,7 @@ interface UserRow {
 
 export interface IUser {
   id?: number;
+  _id: string;
   name: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -16,6 +17,7 @@ export interface IUser {
 
 const rowToUser = (row: UserRow): IUser => ({
   id: row.id,
+  _id: String(row.id),
   name: row.name,
   createdAt: new Date(row.createdAt),
   updatedAt: new Date(row.updatedAt)

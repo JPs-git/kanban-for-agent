@@ -9,10 +9,11 @@ interface CardEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (id: string, updates: { title?: string; content?: string; status?: CardStatus; assignee?: string; assigneeName?: string }) => void;
+  onDelete: (id: string) => void;
   users: User[];
 }
 
-const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave, users }) => {
+const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave, onDelete, users }) => {
   const [editTitle, setEditTitle] = useState(card?.title || '');
   const [editContent, setEditContent] = useState(card?.content || '');
   const [editStatus, setEditStatus] = useState<CardStatus>(card?.status || CardStatus.TODO);
@@ -96,6 +97,12 @@ const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onCl
         </div>
       </div>
       <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
+        <Button variant="danger" onClick={() => {
+          if (card._id) {
+            onDelete(card._id);
+            onClose();
+          }
+        }}>删除</Button>
         <Button variant="secondary" onClick={onClose}>取消</Button>
         <Button variant="success" onClick={handleSave}>保存</Button>
       </div>
