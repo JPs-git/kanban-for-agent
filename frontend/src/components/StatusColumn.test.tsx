@@ -1,9 +1,7 @@
-
 import { render, screen } from '@testing-library/react';
 import StatusColumn from './StatusColumn';
 import { CardStatus } from '../types';
 
-// 模拟react-dnd
 vi.mock('react-dnd', () => ({
   useDrop: vi.fn(() => [
     { isOver: false },
@@ -11,7 +9,6 @@ vi.mock('react-dnd', () => ({
   ]),
 }));
 
-// 模拟Card组件
 vi.mock('./Card', () => {
   return {
     default: function MockCard({ card, onDelete, onEdit }: { card: { _id: string; title: string }; onDelete: (id: string) => void; onEdit: (card: { _id: string; title: string }) => void }) {
@@ -139,7 +136,7 @@ describe('StatusColumn Component', () => {
         onEditCard={mockOnEditCard}
       />
     );
-    const columnElement = container.querySelector('.status-column');
+    const columnElement = container.querySelector('[data-testid="status-column"]');
     expect(columnElement).toBeInTheDocument();
   });
 });

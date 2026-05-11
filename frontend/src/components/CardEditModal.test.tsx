@@ -32,7 +32,6 @@ describe('CardEditModal', () => {
       />
     );
 
-    // 验证输入框已自动填充
     const titleInput = screen.getByPlaceholderText('Card title');
     const contentInput = screen.getByPlaceholderText('Card content');
     const statusSelect = screen.getByLabelText('状态');
@@ -44,7 +43,7 @@ describe('CardEditModal', () => {
     expect(assigneeSelect).toHaveValue('1');
   });
 
-  test('should update form when card prop changes', () => {
+  test('should reinitialize form when card id changes', () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
 
@@ -58,16 +57,15 @@ describe('CardEditModal', () => {
       />
     );
 
-    // 验证初始值
     expect(screen.getByPlaceholderText('Card title')).toHaveValue('Test Card');
 
-    // 更改卡片数据
     const updatedCard = {
-      ...mockCard,
+      _id: '2',
       title: 'Updated Card',
       content: 'Updated Content',
       status: CardStatus.DONE,
       assignee: '2',
+      assigneeName: 'User 2',
     };
 
     rerender(
@@ -80,7 +78,6 @@ describe('CardEditModal', () => {
       />
     );
 
-    // 验证表单已更新
     expect(screen.getByPlaceholderText('Card title')).toHaveValue('Updated Card');
     expect(screen.getByPlaceholderText('Card content')).toHaveValue('Updated Content');
     expect(screen.getByLabelText('状态')).toHaveValue(CardStatus.DONE);
@@ -101,15 +98,12 @@ describe('CardEditModal', () => {
       />
     );
 
-    // 修改表单
     fireEvent.change(screen.getByPlaceholderText('Card title'), {
       target: { value: 'Updated Title' },
     });
 
-    // 提交表单
     fireEvent.click(screen.getByText('保存'));
 
-    // 验证 onSave 被调用
     expect(onSave).toHaveBeenCalledWith('1', {
       title: 'Updated Title',
       content: 'Test Content',
@@ -118,7 +112,6 @@ describe('CardEditModal', () => {
       assigneeName: 'User 1',
     });
 
-    // 验证 onClose 被调用
     expect(onClose).toHaveBeenCalled();
   });
 
@@ -136,15 +129,12 @@ describe('CardEditModal', () => {
       />
     );
 
-    // 清空标题
     fireEvent.change(screen.getByPlaceholderText('Card title'), {
       target: { value: '' },
     });
 
-    // 提交表单
     fireEvent.click(screen.getByText('保存'));
 
-    // 验证 onSave 未被调用
     expect(onSave).not.toHaveBeenCalled();
   });
 

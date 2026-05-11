@@ -20,7 +20,6 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
     assigneeName: '未分配',
   });
 
-  // 自定义关闭函数，先重置状态再调用传入的 onClose
   const handleClose = () => {
     setNewCard({
       title: '',
@@ -54,69 +53,71 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd, use
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="添加卡片" width="500px">
-      <div className="form-group">
-        <label htmlFor="add-title">标题</label>
-        <input
-          type="text"
-          id="add-title"
-          value={newCard.title}
-          onChange={(e) =>
-            setNewCard({ ...newCard, title: e.target.value })
-          }
-          className="modal-input"
-          placeholder="Card title"
-          autoFocus
-        />
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="add-title" className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+          <input
+            type="text"
+            id="add-title"
+            value={newCard.title}
+            onChange={(e) =>
+              setNewCard({ ...newCard, title: e.target.value })
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="Card title"
+            autoFocus
+          />
+        </div>
+        <div>
+          <label htmlFor="add-content" className="block text-sm font-medium text-gray-700 mb-1">内容</label>
+          <textarea
+            id="add-content"
+            value={newCard.content}
+            onChange={(e) =>
+              setNewCard({ ...newCard, content: e.target.value })
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+            placeholder="Card content"
+            rows={4}
+          />
+        </div>
+        <div>
+          <label htmlFor="add-status" className="block text-sm font-medium text-gray-700 mb-1">状态</label>
+          <select
+            id="add-status"
+            value={newCard.status}
+            onChange={(e) =>
+              setNewCard({ ...newCard, status: e.target.value as CardStatus })
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            {Object.values(CardStatus).map((status) => (
+              <option key={status} value={status}>
+                {statusLabels[status]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="add-assignee" className="block text-sm font-medium text-gray-700 mb-1">分配给</label>
+          <select
+            id="add-assignee"
+            value={newCard.assignee}
+            onChange={(e) =>
+              setNewCard({ ...newCard, assignee: e.target.value })
+            }
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="">未分配</option>
+            {users.map((user) => (
+              <option key={user._id} value={user._id}>
+                {user.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
-      <div className="form-group">
-        <label htmlFor="add-content">内容</label>
-        <textarea
-          id="add-content"
-          value={newCard.content}
-          onChange={(e) =>
-            setNewCard({ ...newCard, content: e.target.value })
-          }
-          className="modal-textarea"
-          placeholder="Card content"
-          rows={4}
-        />
-      </div>
-      <div className="form-group">
-        <label htmlFor="add-status">状态</label>
-        <select
-          id="add-status"
-          value={newCard.status}
-          onChange={(e) =>
-            setNewCard({ ...newCard, status: e.target.value as CardStatus })
-          }
-          className="modal-select"
-        >
-          {Object.values(CardStatus).map((status) => (
-            <option key={status} value={status}>
-              {statusLabels[status]}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="form-group">
-        <label htmlFor="add-assignee">分配给</label>
-        <select
-          id="add-assignee"
-          value={newCard.assignee}
-          onChange={(e) =>
-            setNewCard({ ...newCard, assignee: e.target.value })
-          }
-          className="modal-select"
-        >
-          <option value="">未分配</option>
-          {users.map((user) => (
-            <option key={user._id} value={user._id}>
-              {user.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="modal-footer">
+      <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
         <Button variant="secondary" onClick={handleClose}>取消</Button>
         <Button variant="success" onClick={handleSubmit}>保存</Button>
       </div>

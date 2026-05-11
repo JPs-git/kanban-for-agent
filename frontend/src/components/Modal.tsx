@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { X } from 'lucide-react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -24,17 +25,22 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, width =
 
   return (
     <div 
-      className="modal-overlay" 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in"
       onClick={onClose}
     >
       <div 
-        className="modal-content" 
-        style={{ width }} 
+        className="bg-white rounded-xl shadow-modal p-6 max-w-[90vw] w-full animate-slide-up"
+        style={{ width }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-header">
-          <h3>{title}</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+          <button 
+            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={onClose}
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
         <div className="modal-body">
           {children}

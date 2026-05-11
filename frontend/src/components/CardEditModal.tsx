@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { Card, User } from '../types';
 import { CardStatus } from '../types';
 import Modal from './Modal';
@@ -12,23 +12,11 @@ interface CardEditModalProps {
   users: User[];
 }
 
-const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave, users }) => {
+const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave, users }) => {
   const [editTitle, setEditTitle] = useState(card?.title || '');
   const [editContent, setEditContent] = useState(card?.content || '');
   const [editStatus, setEditStatus] = useState<CardStatus>(card?.status || CardStatus.TODO);
   const [editAssignee, setEditAssignee] = useState(card?.assignee || '');
-
-  // 当卡片数据变化时更新状态
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (card) {
-      setEditTitle(card.title || '');
-      setEditContent(card.content || '');
-      setEditStatus(card.status || CardStatus.TODO);
-      setEditAssignee(card.assignee || '');
-    }
-  }, [card]); // 当 card 变化时更新
 
   const statusLabels: Record<CardStatus, string> = {
     [CardStatus.TODO]: '待处理',
@@ -55,62 +43,68 @@ const CardEditModal: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, on
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="编辑卡片" width="500px">
-      <div className="form-group">
-        <label htmlFor="edit-title">标题</label>
-        <input
-          type="text"
-          id="edit-title"
-          value={editTitle}
-          onChange={(e) => setEditTitle(e.target.value)}
-          className="modal-input"
-          placeholder="Card title"
-          autoFocus
-        />
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+          <input
+            type="text"
+            id="edit-title"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="Card title"
+            autoFocus
+          />
+        </div>
+        <div>
+          <label htmlFor="edit-content" className="block text-sm font-medium text-gray-700 mb-1">内容</label>
+          <textarea
+            id="edit-content"
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+            placeholder="Card content"
+            rows={4}
+          />
+        </div>
+        <div>
+          <label htmlFor="edit-status" className="block text-sm font-medium text-gray-700 mb-1">状态</label>
+          <select
+            id="edit-status"
+            value={editStatus}
+            onChange={(e) => setEditStatus(e.target.value as CardStatus)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            {Object.values(CardStatus).map((status) => (
+              <option key={status} value={status}>{statusLabels[status]}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="edit-assignee" className="block text-sm font-medium text-gray-700 mb-1">分配给</label>
+          <select
+            id="edit-assignee"
+            value={editAssignee}
+            onChange={(e) => setEditAssignee(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="">未分配</option>
+            {users.map(user => (
+              <option key={user._id} value={user._id}>{user.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
-      <div className="form-group">
-        <label htmlFor="edit-content">内容</label>
-        <textarea
-          id="edit-content"
-          value={editContent}
-          onChange={(e) => setEditContent(e.target.value)}
-          className="modal-textarea"
-          placeholder="Card content"
-          rows={4}
-        />
-      </div>
-      <div className="form-group">
-        <label htmlFor="edit-status">状态</label>
-        <select
-          id="edit-status"
-          value={editStatus}
-          onChange={(e) => setEditStatus(e.target.value as CardStatus)}
-          className="modal-select"
-        >
-          {Object.values(CardStatus).map((status) => (
-            <option key={status} value={status}>{statusLabels[status]}</option>
-          ))}
-        </select>
-      </div>
-      <div className="form-group">
-        <label htmlFor="edit-assignee">分配给</label>
-        <select
-          id="edit-assignee"
-          value={editAssignee}
-          onChange={(e) => setEditAssignee(e.target.value)}
-          className="modal-select"
-        >
-          <option value="">未分配</option>
-          {users.map(user => (
-            <option key={user._id} value={user._id}>{user.name}</option>
-          ))}
-        </select>
-      </div>
-      <div className="modal-footer">
+      <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
         <Button variant="secondary" onClick={onClose}>取消</Button>
         <Button variant="success" onClick={handleSave}>保存</Button>
       </div>
     </Modal>
   );
+};
+
+const CardEditModal: React.FC<CardEditModalProps> = ({ card, ...props }) => {
+  return <CardEditModalContent key={card?._id} card={card} {...props} />;
 };
 
 export default CardEditModal;
