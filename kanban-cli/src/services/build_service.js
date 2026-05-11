@@ -28,7 +28,8 @@ class BuildService {
     try {
       const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
       const result = spawnSync(npmCmd, ['--version'], {
-        stdio: ['ignore', 'pipe', 'ignore']
+        stdio: ['ignore', 'pipe', 'ignore'],
+        shell: process.platform === 'win32'
       });
       if (result.status === 0) {
         logger.debug(`npm version: ${result.stdout.toString().trim()}`);
@@ -60,7 +61,8 @@ class BuildService {
     try {
       const result = spawnSync(npmCmd, ['install'], {
         cwd: backendPath,
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32'
       });
 
       if (result.status !== 0) {
@@ -83,7 +85,8 @@ class BuildService {
     try {
       const result = spawnSync(npmCmd, ['run', 'build'], {
         cwd: backendPath,
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32'
       });
 
       if (result.status !== 0) {
@@ -106,7 +109,8 @@ class BuildService {
     try {
       const result = spawnSync(npmCmd, ['install'], {
         cwd: frontendPath,
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32'
       });
 
       if (result.status !== 0) {
@@ -131,7 +135,8 @@ class BuildService {
     try {
       const result = spawnSync(npmCmd, ['run', 'build'], {
         cwd: frontendPath,
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32'
       });
 
       if (result.status !== 0) {
@@ -145,11 +150,11 @@ class BuildService {
         if (!fs.existsSync(publicDir)) {
           fs.mkdirSync(publicDir, { recursive: true });
         }
-        
+
         if (fs.existsSync(publicPath)) {
           this.deleteDir(publicPath);
         }
-        
+
         this.copyDir(distPath, publicPath);
         logger.info(`Frontend files copied to ${publicPath}`);
       } else {
@@ -185,12 +190,12 @@ class BuildService {
     if (!fs.existsSync(dest)) {
       fs.mkdirSync(dest, { recursive: true });
     }
-    
+
     const files = fs.readdirSync(src);
     for (const file of files) {
       const srcPath = path.join(src, file);
       const destPath = path.join(dest, file);
-      
+
       if (fs.lstatSync(srcPath).isDirectory()) {
         this.copyDir(srcPath, destPath);
       } else {
