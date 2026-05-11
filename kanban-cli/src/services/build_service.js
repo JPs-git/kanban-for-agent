@@ -58,14 +58,14 @@ class BuildService {
     logger.info('Installing dependencies...');
 
     try {
-      const result = spawnSync(npmCmd, ['install'], {
+      const result = spawnSync(npmCmd, ['run', 'install'], {
         cwd: this.repoPath,
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: process.platform === 'win32'
       });
 
       if (result.status !== 0) {
-        logger.error(`npm install failed: ${result.stderr.toString()}`);
+        logger.error(`npm run install failed: ${result.stderr.toString()}`);
         return false;
       }
       logger.info('Dependencies installed successfully');
