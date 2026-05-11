@@ -1,5 +1,6 @@
 import { logger } from '../utils/logger.js';
 import { BackendService } from '../services/backend_service.js';
+import { config } from '../utils/config.js';
 
 export async function deploy(repoUrl) {
   const backendService = new BackendService();
@@ -9,7 +10,7 @@ export async function deploy(repoUrl) {
   if (success) {
     logger.success('Deployment completed successfully!');
     await backendService.start();
-    logger.info(`Kanban service is starting on port ${process.env.PORT || 3000}`);
+    logger.info(`Kanban service is starting on port ${config.serverPort}`);
   } else {
     logger.failure('Deployment failed. Check logs for details.');
     process.exit(1);

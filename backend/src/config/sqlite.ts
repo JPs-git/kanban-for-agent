@@ -1,9 +1,6 @@
 import Database from 'better-sqlite3';
-import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
-
-dotenv.config();
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 

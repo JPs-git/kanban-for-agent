@@ -19,7 +19,7 @@ const DEFAULT_CONFIG = {
   },
   server: {
     host: '0.0.0.0',
-    port: 3000
+    port: 24954
   },
   frontend: {
     output_path: 'backend/dist/public'
@@ -33,7 +33,7 @@ class Config {
   }
 
   load(configPath) {
-    const configFile = configPath 
+    const configFile = configPath
       ? path.resolve(configPath)
       : path.join(this.expandPath('~/.kanban-for-agent'), 'config.yaml');
 
@@ -47,22 +47,22 @@ class Config {
   }
 
   save(configPath) {
-    const configFile = configPath 
+    const configFile = configPath
       ? path.resolve(configPath)
       : path.join(this.expandPath('~/.kanban-for-agent'), 'config.yaml');
-    
+
     const dir = path.dirname(configFile);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     fs.writeFileSync(configFile, yaml.stringify(this.config, null, 2));
   }
 
   get(key, defaultValue) {
     const keys = key.split('.');
     let value = this.config;
-    
+
     for (const k of keys) {
       if (typeof value === 'object' && value !== null && k in value) {
         value = value[k];
@@ -70,14 +70,14 @@ class Config {
         return defaultValue;
       }
     }
-    
+
     return value !== undefined ? value : defaultValue;
   }
 
   set(key, value) {
     const keys = key.split('.');
     let config = this.config;
-    
+
     for (let i = 0; i < keys.length - 1; i++) {
       const k = keys[i];
       if (!(k in config)) {
@@ -85,14 +85,14 @@ class Config {
       }
       config = config[k];
     }
-    
+
     config[keys[keys.length - 1]] = value;
   }
 
   expandPath(p) {
     if (p.startsWith('~')) {
-      const home = process.platform === 'win32' 
-        ? process.env.USERPROFILE 
+      const home = process.platform === 'win32'
+        ? process.env.USERPROFILE
         : process.env.HOME;
       return p.replace('~', home);
     }
