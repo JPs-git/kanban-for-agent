@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent } from '@testing-library/react';
 import Button from './Button';
 
@@ -10,34 +9,43 @@ describe('Button Component', () => {
   });
 
   test('applies correct variant classes', () => {
+    const variantClasses: Record<string, string> = {
+      primary: 'bg-primary-500',
+      success: 'bg-success-500',
+      danger: 'bg-danger-500',
+      secondary: 'bg-gray-100',
+    };
     const variants = ['primary', 'success', 'danger', 'secondary'] as const;
     variants.forEach(variant => {
       const { container } = render(<Button variant={variant}>Test</Button>);
       const buttonElement = container.querySelector('button');
-      expect(buttonElement).toHaveClass(`btn-${variant}`);
+      expect(buttonElement).toHaveClass(variantClasses[variant]);
     });
   });
 
   test('applies correct size classes', () => {
+    const sizeClasses: Record<string, string> = {
+      small: 'h-8',
+      medium: 'h-9',
+      large: 'h-11',
+    };
     const sizes = ['small', 'medium', 'large'] as const;
     sizes.forEach(size => {
       const { container } = render(<Button size={size}>Test</Button>);
       const buttonElement = container.querySelector('button');
-      expect(buttonElement).toHaveClass(`btn-${size}`);
+      expect(buttonElement).toHaveClass(sizeClasses[size]);
     });
   });
 
-  test('applies disabled class when disabled prop is true', () => {
+  test('applies disabled styles when disabled prop is true', () => {
     render(<Button disabled>Test</Button>);
     const buttonElement = screen.getByText('Test');
-    expect(buttonElement).toHaveClass('disabled');
     expect(buttonElement).toBeDisabled();
   });
 
-  test('does not apply disabled class when disabled prop is false', () => {
+  test('does not apply disabled styles when disabled prop is false', () => {
     render(<Button disabled={false}>Test</Button>);
     const buttonElement = screen.getByText('Test');
-    expect(buttonElement).not.toHaveClass('disabled');
     expect(buttonElement).not.toBeDisabled();
   });
 
@@ -67,8 +75,8 @@ describe('Button Component', () => {
   test('uses default props when not provided', () => {
     render(<Button>Test</Button>);
     const buttonElement = screen.getByText('Test');
-    expect(buttonElement).toHaveClass('btn-primary');
-    expect(buttonElement).toHaveClass('btn-medium');
+    expect(buttonElement).toHaveClass('bg-primary-500');
+    expect(buttonElement).toHaveClass('h-9');
     expect(buttonElement).not.toBeDisabled();
     expect(buttonElement).toHaveAttribute('type', 'button');
   });

@@ -30,7 +30,6 @@ const UserManagement: React.FC<UserManagementProps> = ({
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-  // 过滤和排序用户列表
   const filteredAndSortedUsers = users
     .filter((user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -43,19 +42,16 @@ const UserManagement: React.FC<UserManagementProps> = ({
       }
     });
 
-  // 处理添加用户
   const handleAddUser = async (name: string) => {
     await onAddUser(name);
     setIsAddFormOpen(false);
   };
 
-  // 处理编辑用户
   const handleEditUser = async (id: string, name: string) => {
     await onUpdateUser(id, name);
     setEditingUser(null);
   };
 
-  // 处理删除用户
   const handleDeleteUser = async (userId: string) => {
     await onDeleteUser(userId);
     setUserToDelete(null);
@@ -65,18 +61,18 @@ const UserManagement: React.FC<UserManagementProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="用户管理" width="400px">
-      <div className="user-management-search">
+      <div className="flex gap-3 mb-4">
         <input
           type="text"
           placeholder="搜索用户..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as "id" | "name")}
-          className="sort-select"
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           <option value="id">按ID排序</option>
           <option value="name">按名称排序</option>
@@ -84,45 +80,49 @@ const UserManagement: React.FC<UserManagementProps> = ({
       </div>
 
       {loading ? (
-        <div className="loading">加载中...</div>
+        <div className="text-center py-8 text-gray-500">加载中...</div>
       ) : (
-        <div className="user-list">
+        <div className="max-h-64 overflow-y-auto mb-4">
           {filteredAndSortedUsers.length === 0 ? (
-            <div className="empty-state">暂无用户</div>
+            <div className="text-center py-8 text-gray-400 text-sm">暂无用户</div>
           ) : (
-            filteredAndSortedUsers.map((user) => (
-              <div key={user._id} className="user-item">
-                <div className="user-info">
-                  <span className="user-id">ID: {user._id}</span>
-                  <span className="user-name">{user.name}</span>
+            <div className="space-y-2">
+              {filteredAndSortedUsers.map((user) => (
+                <div 
+                  key={user._id} 
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                >
+                  <div>
+                    <span className="text-xs text-gray-400 block">ID: {user._id}</span>
+                    <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="primary"
+                      size="small"
+                      onClick={() => setEditingUser(user)}
+                    >
+                      编辑
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
+                      onClick={() => setUserToDelete(user)}
+                    >
+                      删除
+                    </Button>
+                  </div>
                 </div>
-                <div className="user-actions">
-                  <Button
-                    variant="primary"
-                    size="small"
-                    onClick={() => setEditingUser(user)}
-                  >
-                    编辑
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="small"
-                    onClick={() => setUserToDelete(user)}
-                  >
-                    删除
-                  </Button>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       )}
 
-      <Button variant="success" onClick={() => setIsAddFormOpen(true)}>
+      <Button variant="success" onClick={() => setIsAddFormOpen(true)} className="w-full">
         添加用户
       </Button>
 
-      {/* 添加用户表单 */}
       {isAddFormOpen && (
         <UserForm
           onSave={handleAddUser}
@@ -131,7 +131,6 @@ const UserManagement: React.FC<UserManagementProps> = ({
         />
       )}
 
-      {/* 编辑用户表单 */}
       {editingUser && (
         <UserForm
           onSave={(name) => handleEditUser(editingUser._id, name)}
@@ -140,7 +139,6 @@ const UserManagement: React.FC<UserManagementProps> = ({
         />
       )}
 
-      {/* 删除用户确认 */}
       {userToDelete && (
         <UserDeleteConfirm
           user={userToDelete}
