@@ -37,8 +37,8 @@ echo Cloning repository...
 
 if exist "%INSTALL_DIR%\.git" (
     cd /d "%INSTALL_DIR%"
-    git checkout patch/cli-fix
-    git pull origin patch/cli-fix
+    git checkout master
+    git pull origin master
 ) else (
     rmdir /s /q "%INSTALL_DIR%" 2>nul
     git clone -b patch/cli-fix https://github.com/JPs-git/kanban-for-agent.git "%INSTALL_DIR%"
