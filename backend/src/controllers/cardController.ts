@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Card, CardStatus } from '../models/Card.js';
 
-export const getCards = (req: Request, res: Response) => {
+export const getCards = async (req: Request, res: Response) => {
   try {
     const cards = Card.find();
     res.status(200).json(cards);
@@ -10,7 +10,7 @@ export const getCards = (req: Request, res: Response) => {
   }
 };
 
-export const createCard = (req: Request, res: Response) => {
+export const createCard = async (req: Request, res: Response) => {
   try {
     const { title, content, status, assignee, assigneeName } = req.body;
     
@@ -31,7 +31,7 @@ export const createCard = (req: Request, res: Response) => {
   }
 };
 
-export const updateCard = (req: Request, res: Response) => {
+export const updateCard = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { title, content, status, assignee, assigneeName } = req.body;
@@ -58,7 +58,7 @@ export const updateCard = (req: Request, res: Response) => {
   }
 };
 
-export const deleteCard = (req: Request, res: Response) => {
+export const deleteCard = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
