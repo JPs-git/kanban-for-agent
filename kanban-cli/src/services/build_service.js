@@ -53,14 +53,13 @@ class BuildService {
     return true;
   }
 
-  installBackendDeps() {
-    const backendPath = path.join(this.repoPath, 'backend');
+  installDependencies() {
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    logger.info('Installing backend dependencies...');
+    logger.info('Installing dependencies...');
 
     try {
       const result = spawnSync(npmCmd, ['install'], {
-        cwd: backendPath,
+        cwd: this.repoPath,
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: process.platform === 'win32'
       });
@@ -69,104 +68,52 @@ class BuildService {
         logger.error(`npm install failed: ${result.stderr.toString()}`);
         return false;
       }
-      logger.info('Backend dependencies installed successfully');
+      logger.info('Dependencies installed successfully');
       return true;
     } catch (err) {
-      logger.error(`Failed to install backend dependencies: ${err.message}`);
+      logger.error(`Failed to install dependencies: ${err.message}`);
       return false;
     }
   }
 
-  buildBackend() {
-    const backendPath = path.join(this.repoPath, 'backend');
+  runBuild() {
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    logger.info('Building backend...');
+    logger.info('Building project...');
 
     try {
       const result = spawnSync(npmCmd, ['run', 'build'], {
-        cwd: backendPath,
+        cwd: this.repoPath,
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: process.platform === 'win32'
       });
 
       if (result.status !== 0) {
-        logger.error(`Backend build failed: ${result.stderr.toString()}`);
+        logger.error(`Build failed: ${result.stderr.toString()}`);
         return false;
       }
-      logger.info('Backend built successfully');
+      logger.info('Build completed successfully');
       return true;
     } catch (err) {
-      logger.error(`Failed to build backend: ${err.message}`);
+      logger.error(`Failed to build project: ${err.message}`);
       return false;
     }
   }
 
-  installFrontendDeps() {
-    const frontendPath = path.join(this.repoPath, 'frontend');
-    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    logger.info('Installing frontend dependencies...');
+  copyFrontend() {
+    const frontendDist = path.join(this.repoPath, 'frontend', 'dist');
+    const backendPublic = path.join(this.repoPath, 'backend', 'dist', 'public');
 
-    try {
-      const result = spawnSync(npmCmd, ['install'], {
-        cwd: frontendPath,
-        stdio: ['ignore', 'pipe', 'pipe'],
-        shell: process.platform === 'win32'
-      });
+    logger.info('Copying frontend build files to backend...');
 
-      if (result.status !== 0) {
-        logger.error(`Frontend npm install failed: ${result.stderr.toString()}`);
-        return false;
+    if (fs.existsSync(frontendDist)) {
+      if (fs.existsSync(backendPublic)) {
+        this.deleteDir(backendPublic);
       }
-      logger.info('Frontend dependencies installed successfully');
+      this.copyDir(frontendDist, backendPublic);
+      logger.info(`Frontend files copied to ${backendPublic}`);
       return true;
-    } catch (err) {
-      logger.error(`Failed to install frontend dependencies: ${err.message}`);
-      return false;
-    }
-  }
-
-  buildFrontend() {
-    const frontendPath = path.join(this.repoPath, 'frontend');
-    const publicPath = path.join(this.repoPath, 'backend', 'dist', 'public');
-    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-
-    logger.info('Building frontend...');
-
-    try {
-      const result = spawnSync(npmCmd, ['run', 'build'], {
-        cwd: frontendPath,
-        stdio: ['ignore', 'pipe', 'pipe'],
-        shell: process.platform === 'win32'
-      });
-
-      if (result.status !== 0) {
-        logger.error(`Frontend build failed: ${result.stderr.toString()}`);
-        return false;
-      }
-
-      const distPath = path.join(frontendPath, 'dist');
-      if (fs.existsSync(distPath)) {
-        const publicDir = path.dirname(publicPath);
-        if (!fs.existsSync(publicDir)) {
-          fs.mkdirSync(publicDir, { recursive: true });
-        }
-
-        if (fs.existsSync(publicPath)) {
-          this.deleteDir(publicPath);
-        }
-
-        this.copyDir(distPath, publicPath);
-        logger.info(`Frontend files copied to ${publicPath}`);
-      } else {
-        logger.error('Frontend dist directory not found after build');
-        return false;
-      }
-
-      logger.info('Frontend built and deployed successfully');
-      return true;
-
-    } catch (err) {
-      logger.error(`Failed to build frontend: ${err.message}`);
+    } else {
+      logger.error('Frontend dist directory not found');
       return false;
     }
   }
@@ -209,19 +156,15 @@ class BuildService {
       return false;
     }
 
-    if (!this.installBackendDeps()) {
+    if (!this.installDependencies()) {
       return false;
     }
 
-    if (!this.buildBackend()) {
+    if (!this.runBuild()) {
       return false;
     }
 
-    if (!this.installFrontendDeps()) {
-      return false;
-    }
-
-    if (!this.buildFrontend()) {
+    if (!this.copyFrontend()) {
       return false;
     }
 

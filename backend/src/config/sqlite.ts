@@ -10,15 +10,19 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 let dbPath: string;
 const baseDir = process.cwd();
 
-switch (NODE_ENV) {
-  case 'test':
-    dbPath = process.env.SQLITE_TEST_PATH || path.join(baseDir, 'data/test.db');
-    break;
-  case 'production':
-    dbPath = process.env.SQLITE_PROD_PATH || path.join(baseDir, 'data/prod.db');
-    break;
-  default:
-    dbPath = process.env.SQLITE_DEV_PATH || path.join(baseDir, 'data/dev.db');
+if (process.env.SQLITE_PATH) {
+  dbPath = path.join(baseDir, process.env.SQLITE_PATH);
+} else {
+  switch (NODE_ENV) {
+    case 'test':
+      dbPath = process.env.SQLITE_TEST_PATH || path.join(baseDir, 'data/test.db');
+      break;
+    case 'production':
+      dbPath = process.env.SQLITE_PROD_PATH || path.join(baseDir, 'data/prod.db');
+      break;
+    default:
+      dbPath = process.env.SQLITE_DEV_PATH || path.join(baseDir, 'data/dev.db');
+  }
 }
 
 const dbDir = path.dirname(dbPath);

@@ -1,9 +1,17 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import cardRoutes from "./routes/cardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+
+const env = process.env.NODE_ENV || "production";
+const envPath = path.join(
+  path.resolve(),
+  `.env${env === "production" ? "" : `.${env}`}`,
+);
+dotenv.config({ path: envPath });
 
 declare const __dirname: string;
 const currentDir =
@@ -15,7 +23,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const staticPath = path.join(currentDir, "public");
+const staticPath = path.join(currentDir, "dist", "public");
 
 app.use(express.static(staticPath));
 
