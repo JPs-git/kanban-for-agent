@@ -6,16 +6,13 @@ import { connectDB } from "./config/db.js";
 import cardRoutes from "./routes/cardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
+const currentDir = process.cwd();
 const env = process.env.NODE_ENV || "production";
 const envPath = path.join(
-  path.resolve(),
+  currentDir,
   `.env${env === "production" ? "" : `.${env}`}`,
 );
 dotenv.config({ path: envPath });
-
-declare const __dirname: string;
-const currentDir =
-  typeof __dirname !== "undefined" ? __dirname : path.resolve();
 
 export const app = express();
 const PORT = process.env.PORT || 3000;
