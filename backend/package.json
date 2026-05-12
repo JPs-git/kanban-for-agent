@@ -7,7 +7,7 @@
     "dev": "cross-env NODE_ENV=development tsx src/server.ts",
     "build": "tsc",
     "start": "cross-env NODE_ENV=production node dist/server.js",
-    "test:unit": "jest",
+    "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
     "test:unit:watch": "jest --watch",
     "test:unit:coverage": "jest --coverage",
     "lint": "eslint ."
@@ -23,6 +23,9 @@
     "express": "^4.19.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -31,6 +34,7 @@
     "@types/supertest": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^8.57.0",
     "@typescript-eslint/parser": "^8.57.0",
+    "babel-jest": "^30.4.1",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "jest": "^30.3.0",
