@@ -7,6 +7,9 @@ on:
     branches: [v*]
     types: [opened, synchronize]
 
+permissions:
+  contents: write
+
 jobs:
   version-update:
     runs-on: ubuntu-latest
