@@ -13,7 +13,7 @@ interface CardProps {
 const Card: React.FC<CardProps> = ({ card, onDelete, onEdit }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "CARD",
-    item: { id: card._id, status: card.status },
+    item: { id: card.id, status: card.status },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -53,8 +53,8 @@ const Card: React.FC<CardProps> = ({ card, onDelete, onEdit }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (card._id) {
-              onDelete(card._id);
+            if (card.id) {
+              onDelete(card.id);
             }
           }}
           aria-label="Delete card"

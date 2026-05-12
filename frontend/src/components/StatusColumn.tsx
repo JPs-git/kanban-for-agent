@@ -67,7 +67,7 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
       <div className="flex flex-col gap-3 flex-1 overflow-y-auto min-h-0">
         {cards.map((card) => (
           <Card
-            key={card._id}
+            key={card.id}
             card={card}
             onDelete={onDeleteCard}
             onEdit={onEditCard}

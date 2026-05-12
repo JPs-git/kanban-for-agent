@@ -11,11 +11,11 @@ vi.mock('react-dnd', () => ({
 
 vi.mock('./Card', () => {
   return {
-    default: function MockCard({ card, onDelete, onEdit }: { card: { _id: string; title: string }; onDelete: (id: string) => void; onEdit: (card: { _id: string; title: string }) => void }) {
+    default: function MockCard({ card, onDelete, onEdit }: { card: { id: string; title: string }; onDelete: (id: string) => void; onEdit: (card: { id: string; title: string }) => void }) {
       return (
-        <div data-testid={`card-${card._id}`}>
+        <div data-testid={`card-${card.id}`}>
           <h3>{card.title}</h3>
-          <button onClick={() => onDelete(card._id)}>Delete</button>
+          <button onClick={() => onDelete(card.id)}>Delete</button>
           <button onClick={() => onEdit(card)}>Edit</button>
         </div>
       );
@@ -26,14 +26,14 @@ vi.mock('./Card', () => {
 describe('StatusColumn Component', () => {
   const mockCards = [
     {
-      _id: '1',
+      id: '1',
       title: 'Card 1',
       content: 'Content 1',
       status: CardStatus.TODO,
       assigneeName: 'John Doe',
     },
     {
-      _id: '2',
+      id: '2',
       title: 'Card 2',
       content: 'Content 2',
       status: CardStatus.TODO,

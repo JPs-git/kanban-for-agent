@@ -11,7 +11,7 @@ vi.mock('react-dnd', () => ({
 
 describe('Card Component', () => {
   const mockCard = {
-    _id: '1',
+    id: '1',
     title: 'Test Card',
     content: 'Test content',
     status: CardStatus.TODO,

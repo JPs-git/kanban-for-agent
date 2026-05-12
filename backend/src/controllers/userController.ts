@@ -10,6 +10,23 @@ export const getUsers = (req: Request, res: Response) => {
   }
 };
 
+export const getUser = (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = Array.isArray(id) ? id[0] : id;
+    
+    const user = User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.status(200).json(user);
+  } catch {
+    res.status(500).json({ error: 'Failed to get user' });
+  }
+};
+
 export const createUser = (req: Request, res: Response) => {
   try {
     const { name } = req.body;
@@ -38,7 +55,7 @@ export const updateUser = (req: Request, res: Response) => {
     
     const userId = Array.isArray(id) ? id[0] : id;
     const user = User.findByIdAndUpdate(
-      parseInt(userId),
+      userId,
       { name: name.trim() }
     );
     
@@ -57,7 +74,7 @@ export const deleteUser = (req: Request, res: Response) => {
     const { id } = req.params;
     
     const userId = Array.isArray(id) ? id[0] : id;
-    const user = User.findByIdAndDelete(parseInt(userId));
+    const user = User.findByIdAndDelete(userId);
     
     if (!user) {
       return res.status(404).json({ error: 'User not found' });

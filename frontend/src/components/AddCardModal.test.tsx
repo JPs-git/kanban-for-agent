@@ -4,8 +4,8 @@ import { CardStatus } from '../types';
 import { vi } from 'vitest';
 
 const mockUsers = [
-  { _id: '1', name: 'User 1' },
-  { _id: '2', name: 'User 2' },
+  { id: '1', name: 'User 1' },
+  { id: '2', name: 'User 2' },
 ];
 
 describe('AddCardModal', () => {
@@ -13,7 +13,6 @@ describe('AddCardModal', () => {
     const onAdd = vi.fn();
     const onClose = vi.fn();
 
-    // 第一次渲染，模态框关闭
     const { rerender } = render(
       <AddCardModal
         isOpen={false}
@@ -23,7 +22,6 @@ describe('AddCardModal', () => {
       />
     );
 
-    // 打开模态框
     rerender(
       <AddCardModal
         isOpen={true}
@@ -33,7 +31,6 @@ describe('AddCardModal', () => {
       />
     );
 
-    // 验证输入框为空
     const titleInput = screen.getByPlaceholderText('Card title');
     const contentInput = screen.getByPlaceholderText('Card content');
     const statusSelect = screen.getByLabelText('状态');
@@ -58,7 +55,6 @@ describe('AddCardModal', () => {
       />
     );
 
-    // 填写表单
     fireEvent.change(screen.getByPlaceholderText('Card title'), {
       target: { value: 'Test Card' },
     });
@@ -75,10 +71,8 @@ describe('AddCardModal', () => {
       target: { value: '1' },
     });
 
-    // 提交表单
     fireEvent.click(screen.getByText('保存'));
 
-    // 验证 onAdd 被调用
     expect(onAdd).toHaveBeenCalledWith({
       title: 'Test Card',
       content: 'Test Content',
@@ -87,7 +81,6 @@ describe('AddCardModal', () => {
       assigneeName: 'User 1',
     });
 
-    // 验证 onClose 被调用
     expect(onClose).toHaveBeenCalled();
   });
 
@@ -104,10 +97,8 @@ describe('AddCardModal', () => {
       />
     );
 
-    // 提交表单（标题为空）
     fireEvent.click(screen.getByText('保存'));
 
-    // 验证 onAdd 未被调用
     expect(onAdd).not.toHaveBeenCalled();
   });
 });

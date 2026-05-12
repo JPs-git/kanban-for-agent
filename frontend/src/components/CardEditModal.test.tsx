@@ -4,12 +4,12 @@ import { CardStatus } from '../types';
 import { vi } from 'vitest';
 
 const mockUsers = [
-  { _id: '1', name: 'User 1' },
-  { _id: '2', name: 'User 2' },
+  { id: '1', name: 'User 1' },
+  { id: '2', name: 'User 2' },
 ];
 
 const mockCard = {
-  _id: '1',
+  id: '1',
   title: 'Test Card',
   content: 'Test Content',
   status: CardStatus.IN_PROGRESS,
@@ -64,7 +64,7 @@ describe('CardEditModal', () => {
     expect(screen.getByPlaceholderText('Card title')).toHaveValue('Test Card');
 
     const updatedCard = {
-      _id: '2',
+      id: '2',
       title: 'Updated Card',
       content: 'Updated Content',
       status: CardStatus.DONE,
