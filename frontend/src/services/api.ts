@@ -1,7 +1,19 @@
 import type { Card, CardCreate, CardUpdate } from "../types";
 
-// 使用相对路径访问 API
+export interface VersionInfo {
+  version: string;
+  environment: string;
+}
+
 const API_URL = "/api/cards";
+
+export const getVersion = async (): Promise<VersionInfo> => {
+  const response = await fetch("/api/version");
+  if (!response.ok) {
+    throw new Error("Failed to get version");
+  }
+  return response.json();
+};
 
 export const getCards = async (): Promise<Card[]> => {
   const response = await fetch(API_URL);
@@ -27,7 +39,7 @@ export const createCard = async (card: CardCreate): Promise<Card> => {
 
 export const updateCard = async (
   id: string,
-  card: CardUpdate
+  card: CardUpdate,
 ): Promise<Card> => {
   const response = await fetch(`${API_URL}/${id}`, {
     method: "PUT",

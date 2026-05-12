@@ -1,3 +1,4 @@
+import { jest, describe, test, expect } from "@jest/globals";
 import request from "supertest";
 import { CardStatus } from "../../src/models/Card";
 import { app } from "../../src/server";
@@ -30,26 +31,30 @@ jest.mock("../../src/models/Card", () => {
         const card = mockCards.find((c) => c.id === id);
         return card || undefined;
       }),
-      create: jest.fn().mockImplementation((cardData: {
-        title: string;
-        content?: string;
-        status?: string;
-        assignee?: string;
-        assigneeName?: string;
-      }) => {
-        const newCard: MockCard = {
-          id: nextId++,
-          title: cardData.title,
-          content: cardData.content || "",
-          status: cardData.status || "TODO",
-          assignee: cardData.assignee,
-          assigneeName: cardData.assigneeName,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        mockCards.push(newCard);
-        return newCard;
-      }),
+      create: jest
+        .fn()
+        .mockImplementation(
+          (cardData: {
+            title: string;
+            content?: string;
+            status?: string;
+            assignee?: string;
+            assigneeName?: string;
+          }) => {
+            const newCard: MockCard = {
+              id: nextId++,
+              title: cardData.title,
+              content: cardData.content || "",
+              status: cardData.status || "TODO",
+              assignee: cardData.assignee,
+              assigneeName: cardData.assigneeName,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+            mockCards.push(newCard);
+            return newCard;
+          },
+        ),
       findByIdAndUpdate: jest.fn().mockImplementation(
         (
           id: number,
@@ -59,16 +64,20 @@ jest.mock("../../src/models/Card", () => {
             status?: string;
             assignee?: string;
             assigneeName?: string;
-          }
+          },
         ) => {
           const index = mockCards.findIndex((c) => c.id === id);
           if (index === -1) {
             return undefined;
           }
-          const updatedCard = { ...mockCards[index], ...update, updatedAt: new Date() };
+          const updatedCard = {
+            ...mockCards[index],
+            ...update,
+            updatedAt: new Date(),
+          };
           mockCards[index] = updatedCard;
           return updatedCard;
-        }
+        },
       ),
       findByIdAndDelete: jest.fn().mockImplementation((id: number) => {
         const index = mockCards.findIndex((c) => c.id === id);
