@@ -1,3 +1,4 @@
+import { describe, test, expect } from '@jest/globals';
 import { Card, CardStatus } from '../../src/models/Card';
 
 describe('Card Model', () => {

@@ -2,14 +2,21 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import dotenv from "dotenv";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
 import cardRoutes from "./routes/cardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
-const currentDir = process.cwd();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const version = fs
+  .readFileSync(path.join(__dirname, "../../VERSION"), "utf-8")
+  .trim();
+
 const env = process.env.NODE_ENV || "production";
 const envPath = path.join(
-  currentDir,
+  __dirname,
+  "../",
   `.env${env === "production" ? "" : `.${env}`}`,
 );
 dotenv.config({ path: envPath });
@@ -20,12 +27,19 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const staticPath = path.join(currentDir, "dist", "public");
+const staticPath = path.join(__dirname, "../", "dist", "public");
 
 app.use(express.static(staticPath));
 
 app.get("/api", (req, res) => {
   res.json({ message: "Kanban API is running" });
+});
+
+app.get("/api/version", (req, res) => {
+  res.json({
+    version: version,
+    environment: process.env.NODE_ENV,
+  });
 });
 
 app.use("/api/cards", cardRoutes);

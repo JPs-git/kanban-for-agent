@@ -2,9 +2,15 @@
 
 import { program } from 'commander';
 import { deploy, update, start, stop, status, restart, logs } from './commands/index.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const version = fs.readFileSync(path.join(__dirname, '../../VERSION'), 'utf-8').trim();
 
 program
-  .version('1.0.0')
+  .version(version)
   .description('Kanban for Agent CLI - Local deployment tool');
 
 program
