@@ -47,21 +47,12 @@ const columnExists = (
   columnName: string,
 ): boolean => {
   try {
-    const columns = db.prepare(`PRAGMA table_info(${tableName})`).all();
-    return columns.some((col: any) => col.name === columnName);
+    const columns = db.prepare(`PRAGMA table_info(${tableName})`).all() as {
+      name: string;
+    }[];
+    return columns.some((col) => col.name === columnName);
   } catch {
     return false;
-  }
-};
-
-const addUUIDColumn = (db: Database.Database, tableName: string): void => {
-  if (!columnExists(db, tableName, "uuid")) {
-    try {
-      db.exec(`ALTER TABLE ${tableName} ADD COLUMN uuid TEXT UNIQUE`);
-      console.log(`Added uuid column to ${tableName} table`);
-    } catch (error) {
-      console.error(`Error adding uuid column to ${tableName}:`, error);
-    }
   }
 };
 

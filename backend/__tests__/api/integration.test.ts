@@ -1,7 +1,8 @@
 import request from "supertest";
+import type { Express } from "express";
 
 describe("API Integration Tests", () => {
-  let app: any;
+  let app: Express;
   let createdCardId: string;
   let createdUserId: string;
 
@@ -42,7 +43,7 @@ describe("API Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
-      response.body.forEach((card: any) => {
+      response.body.forEach((card: { id: string; title: string }) => {
         expect(card.id).toBeDefined();
         expect(card.id.length).toBe(36);
         expect(card.title).toBeDefined();
@@ -141,7 +142,7 @@ describe("API Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
-      response.body.forEach((user: any) => {
+      response.body.forEach((user: { id: string; name: string }) => {
         expect(user.id).toBeDefined();
         expect(user.id.length).toBe(36);
         expect(user.name).toBeDefined();

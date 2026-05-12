@@ -20,8 +20,8 @@ function generateUUID(): string {
 }
 
 export const up = (db: Database.Database): void => {
-  const hasUuidColumn = db.prepare("PRAGMA table_info(users)").all()
-    .some((col: any) => col.name === 'uuid');
+  const hasUuidColumn = (db.prepare("PRAGMA table_info(users)").all() as { name: string }[])
+    .some(col => col.name === 'uuid');
 
   if (!hasUuidColumn) {
     db.exec(`ALTER TABLE users ADD COLUMN uuid TEXT UNIQUE`);
@@ -51,6 +51,6 @@ export const up = (db: Database.Database): void => {
   console.log(`  ✅ Users table migration complete: ${usersWithUuid.count}/${totalUsers.count} users have UUIDs`);
 };
 
-export const down = (_db: Database.Database): void => {
+export const down = (): void => {
   console.log('  ⚠️  Down migration not supported for UUID migration');
 };
