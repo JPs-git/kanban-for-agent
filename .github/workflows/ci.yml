@@ -2,17 +2,19 @@ name: CI
 
 on:
   push:
-    branches: [v*]
+    branches: [v*, patch/*]
   pull_request:
     branches: [v*]
-    types: [closed]
+    types: [opened, synchronize]
 
 jobs:
   version-update:
     runs-on: ubuntu-latest
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.base.ref, 'v') && contains(github.event.pull_request.base.ref, '.'))
-      || (github.event_name == 'push' && contains(github.ref_name, 'v') && contains(github.ref_name, '.') && github.actor != 'dependabot[bot]')
+      github.event_name == 'pull_request' && 
+      contains(github.event.pull_request.base.ref, 'v') && 
+      contains(github.event.pull_request.base.ref, '.') &&
+      startsWith(github.head_ref, 'patch/')
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,46 +26,40 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Extract version from branch
+      - name: Extract version from base branch
         id: extract-version
         run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BRANCH_NAME="${{ github.event.pull_request.base.ref }}"
-          else
-            BRANCH_NAME="${{ github.ref_name }}"
-          fi
-          VERSION_BASE=${BRANCH_NAME#v}
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          VERSION_BASE=${BASE_BRANCH#v}
           echo "VERSION_BASE=$VERSION_BASE" >> $GITHUB_ENV
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+          echo "HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
 
       - name: Validate version branch format
         run: |
           if ! echo "${{ env.VERSION_BASE }}" | grep -qE '^[0-9]+\.[0-9]+$'; then
-            echo "Invalid version branch format: ${{ env.BRANCH_NAME }}"
+            echo "Invalid version branch format: ${{ env.BASE_BRANCH }}"
             exit 1
           fi
 
-      - name: Get current version
-        id: current-version
+      - name: Get current version or calculate next patch
+        id: calculate-version
         run: |
           if [ -f VERSION ]; then
             CURRENT_VERSION=$(cat VERSION)
-            echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+            CURRENT_PATCH=$(echo "$CURRENT_VERSION" | cut -d. -f3)
+            if [ -z "$CURRENT_PATCH" ]; then
+              CURRENT_PATCH=0
+            fi
           else
-            echo "CURRENT_VERSION=0.0.0" >> $GITHUB_ENV
-          fi
-
-      - name: Calculate new patch version
-        id: calculate-patch
-        run: |
-          CURRENT_PATCH=$(echo "${{ env.CURRENT_VERSION }}" | cut -d. -f3)
-          if [ -z "$CURRENT_PATCH" ]; then
             CURRENT_PATCH=0
           fi
+
           NEW_PATCH=$((CURRENT_PATCH + 1))
-          echo "NEW_PATCH=$NEW_PATCH" >> $GITHUB_ENV
-          echo "NEW_VERSION=${{ env.VERSION_BASE }}.$NEW_PATCH" >> $GITHUB_ENV
-          echo "New version will be: ${{ env.VERSION_BASE }}.$NEW_PATCH"
+          NEW_VERSION="${{ env.VERSION_BASE }}.$NEW_PATCH"
+
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "New version will be: $NEW_VERSION"
 
       - name: Update VERSION file
         run: |
@@ -73,20 +69,17 @@ jobs:
       - name: Sync versions to all packages
         run: node scripts/version-sync.js
 
-      - name: Commit and push version changes
+      - name: Commit and push version changes to patch branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add VERSION backend/package.json frontend/package.json kanban-cli/package.json
+          git add VERSION package.json backend/package.json frontend/package.json kanban-cli/package.json
           git diff --cached --quiet || git commit -m "chore: bump version to ${{ env.NEW_VERSION }}"
-          git push
+          git push origin HEAD:${{ github.head_ref }}
 
   build-and-test:
     runs-on: ubuntu-latest
     needs: []
-    if: |
-      github.event_name != 'pull_request' ||
-      github.event.pull_request.merged != true
     steps:
       - uses: actions/checkout@v4
 
