@@ -8,7 +8,6 @@ export const useKanban = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 获取所有卡片
   const fetchCards = async () => {
     try {
       setLoading(true);
@@ -23,7 +22,6 @@ export const useKanban = () => {
     }
   };
 
-  // 创建新卡片
   const addCard = async (card: CardCreate) => {
     try {
       const newCard = await api.createCard(card);
@@ -36,11 +34,10 @@ export const useKanban = () => {
     }
   };
 
-  // 更新卡片
   const updateCardStatus = async (id: string, status: CardStatus) => {
     try {
       const updatedCard = await api.updateCard(id, { status });
-      setCards(prev => prev.map(card => card._id === id ? updatedCard : card));
+      setCards(prev => prev.map(card => card.id === id ? updatedCard : card));
       return updatedCard;
     } catch (err) {
       setError('Failed to update card');
@@ -49,11 +46,10 @@ export const useKanban = () => {
     }
   };
 
-  // 删除卡片
   const removeCard = async (id: string) => {
     try {
       await api.deleteCard(id);
-      setCards(prev => prev.filter(card => card._id !== id));
+      setCards(prev => prev.filter(card => card.id !== id));
     } catch (err) {
       setError('Failed to delete card');
       console.error(err);
@@ -61,7 +57,6 @@ export const useKanban = () => {
     }
   };
 
-  // 初始化时获取卡片
   useEffect(() => {
     fetchCards();
   }, []);

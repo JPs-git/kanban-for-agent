@@ -216,7 +216,7 @@ const KanbanBoard: React.FC = () => {
           </div>
 
           <CardEditModal
-            key={editCard?._id || "null"}
+            key={editCard?.id || "null"}
             card={editCard}
             isOpen={isEditModalOpen}
             onClose={handleModalClose}

@@ -1,40 +1,60 @@
-import React, { useState } from 'react';
-import type { Card, User } from '../types';
-import { CardStatus } from '../types';
-import Modal from './Modal';
-import Button from './Button';
+import React, { useState } from "react";
+import type { Card, User } from "../types";
+import { CardStatus } from "../types";
+import Modal from "./Modal";
+import Button from "./Button";
 
 interface CardEditModalProps {
   card: Partial<Card> | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (id: string, updates: { title?: string; content?: string; status?: CardStatus; assignee?: string; assigneeName?: string }) => void;
+  onSave: (
+    id: string,
+    updates: {
+      title?: string;
+      content?: string;
+      status?: CardStatus;
+      assignee?: string;
+      assigneeName?: string;
+    },
+  ) => void;
   onDelete: (id: string) => void;
   users: User[];
 }
 
-const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onClose, onSave, onDelete, users }) => {
-  const [editTitle, setEditTitle] = useState(card?.title || '');
-  const [editContent, setEditContent] = useState(card?.content || '');
-  const [editStatus, setEditStatus] = useState<CardStatus>(card?.status || CardStatus.TODO);
-  const [editAssignee, setEditAssignee] = useState(card?.assignee || '');
+const CardEditModalContent: React.FC<CardEditModalProps> = ({
+  card,
+  isOpen,
+  onClose,
+  onSave,
+  onDelete,
+  users,
+}) => {
+  const [editTitle, setEditTitle] = useState(card?.title || "");
+  const [editContent, setEditContent] = useState(card?.content || "");
+  const [editStatus, setEditStatus] = useState<CardStatus>(
+    card?.status || CardStatus.TODO,
+  );
+  const [editAssignee, setEditAssignee] = useState(card?.assignee || "");
 
   const statusLabels: Record<CardStatus, string> = {
-    [CardStatus.TODO]: '待处理',
-    [CardStatus.IN_PROGRESS]: '进行中',
-    [CardStatus.DONE]: '已完成',
-    [CardStatus.REJECTED]: '已拒绝'
+    [CardStatus.TODO]: "待处理",
+    [CardStatus.IN_PROGRESS]: "进行中",
+    [CardStatus.DONE]: "已完成",
+    [CardStatus.REJECTED]: "已拒绝",
   };
 
   const handleSave = () => {
-    if (editTitle.trim() && card && card._id) {
-      const assigneeName = editAssignee ? users.find(user => user._id === editAssignee)?.name || '未分配' : '未分配';
-      onSave(card._id, {
+    if (editTitle.trim() && card && card.id) {
+      const assigneeName = editAssignee
+        ? users.find((user) => user.id === editAssignee)?.name || "未分配"
+        : "未分配";
+      onSave(card.id, {
         title: editTitle,
         content: editContent,
         status: editStatus,
         assignee: editAssignee || undefined,
-        assigneeName: assigneeName
+        assigneeName: assigneeName,
       });
       onClose();
     }
@@ -46,7 +66,12 @@ const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onCl
     <Modal isOpen={isOpen} onClose={onClose} title="编辑卡片" width="500px">
       <div className="space-y-4">
         <div>
-          <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+          <label
+            htmlFor="edit-title"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            标题
+          </label>
           <input
             type="text"
             id="edit-title"
@@ -58,7 +83,12 @@ const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onCl
           />
         </div>
         <div>
-          <label htmlFor="edit-content" className="block text-sm font-medium text-gray-700 mb-1">内容</label>
+          <label
+            htmlFor="edit-content"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            内容
+          </label>
           <textarea
             id="edit-content"
             value={editContent}
@@ -69,7 +99,12 @@ const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onCl
           />
         </div>
         <div>
-          <label htmlFor="edit-status" className="block text-sm font-medium text-gray-700 mb-1">状态</label>
+          <label
+            htmlFor="edit-status"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            状态
+          </label>
           <select
             id="edit-status"
             value={editStatus}
@@ -77,12 +112,19 @@ const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onCl
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             {Object.values(CardStatus).map((status) => (
-              <option key={status} value={status}>{statusLabels[status]}</option>
+              <option key={status} value={status}>
+                {statusLabels[status]}
+              </option>
             ))}
           </select>
         </div>
         <div>
-          <label htmlFor="edit-assignee" className="block text-sm font-medium text-gray-700 mb-1">分配给</label>
+          <label
+            htmlFor="edit-assignee"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            分配给
+          </label>
           <select
             id="edit-assignee"
             value={editAssignee}
@@ -90,28 +132,39 @@ const CardEditModalContent: React.FC<CardEditModalProps> = ({ card, isOpen, onCl
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="">未分配</option>
-            {users.map(user => (
-              <option key={user._id} value={user._id}>{user.name}</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
             ))}
           </select>
         </div>
       </div>
       <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
-        <Button variant="danger" onClick={() => {
-          if (card._id) {
-            onDelete(card._id);
-            onClose();
-          }
-        }}>删除</Button>
-        <Button variant="secondary" onClick={onClose}>取消</Button>
-        <Button variant="success" onClick={handleSave}>保存</Button>
+        <Button
+          variant="danger"
+          onClick={() => {
+            if (card.id) {
+              onDelete(card.id);
+              onClose();
+            }
+          }}
+        >
+          删除
+        </Button>
+        <Button variant="secondary" onClick={onClose}>
+          取消
+        </Button>
+        <Button variant="success" onClick={handleSave}>
+          保存
+        </Button>
       </div>
     </Modal>
   );
 };
 
 const CardEditModal: React.FC<CardEditModalProps> = ({ card, ...props }) => {
-  return <CardEditModalContent key={card?._id} card={card} {...props} />;
+  return <CardEditModalContent key={card?.id} card={card} {...props} />;
 };
 
 export default CardEditModal;

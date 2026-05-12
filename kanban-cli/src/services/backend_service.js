@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { spawnSync } from 'child_process';
 import { config } from '../utils/config.js';
 import { logger } from '../utils/logger.js';
 import { ProcessManager } from './process_manager.js';
@@ -32,6 +33,10 @@ class BackendService {
       return false;
     }
 
+    if (!this.runMigrations()) {
+      return false;
+    }
+
     logger.info('Deployment completed successfully!');
     return true;
   }
@@ -47,8 +52,48 @@ class BackendService {
       return false;
     }
 
+    if (!this.runMigrations()) {
+      return false;
+    }
+
     logger.info('Update completed successfully!');
     return true;
+  }
+
+  runMigrations() {
+    const migrationCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+    const migrationArgs = ['tsx', 'src/migrate.ts'];
+
+    logger.info('Running database migrations...');
+
+    try {
+      const result = spawnSync(migrationCmd, migrationArgs, {
+        cwd: path.join(config.repoPath, 'backend'),
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32',
+        env: {
+          ...process.env,
+          NODE_ENV: process.env.NODE_ENV || 'production',
+          SQLITE_PROD_PATH: path.join(config.dataPath, 'prod.db')
+        }
+      });
+
+      if (result.status !== 0) {
+        const errorOutput = result.stderr ? result.stderr.toString() : result.stdout ? result.stdout.toString() : 'Unknown error';
+        logger.error(`Migration failed: ${errorOutput}`);
+        return false;
+      }
+
+      if (result.stdout) {
+        console.log(result.stdout.toString());
+      }
+
+      logger.info('Database migrations completed successfully');
+      return true;
+    } catch (err) {
+      logger.error(`Failed to run migrations: ${err.message}`);
+      return false;
+    }
   }
 
   async start() {

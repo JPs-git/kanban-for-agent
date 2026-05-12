@@ -9,6 +9,7 @@ export enum CardStatus {
 
 interface CardRow {
   id: number;
+  uuid: string;
   title: string;
   content?: string;
   status: string;
@@ -19,8 +20,7 @@ interface CardRow {
 }
 
 interface Card {
-  id?: number;
-  _id: string;
+  id: string;
   title: string;
   content?: string;
   status: CardStatus;
@@ -31,8 +31,7 @@ interface Card {
 }
 
 const rowToCard = (row: CardRow): Card => ({
-  id: row.id,
-  _id: String(row.id),
+  id: row.uuid,
   title: row.title,
   content: row.content,
   status: row.status as CardStatus,
@@ -45,15 +44,15 @@ const rowToCard = (row: CardRow): Card => ({
 export const Card = {
   find: (): Card[] => {
     const db = getDB();
-    const stmt = db.prepare("SELECT * FROM cards");
+    const stmt = db.prepare("SELECT * FROM cards WHERE uuid IS NOT NULL");
     const rows = stmt.all() as CardRow[];
     return rows.map(rowToCard);
   },
 
-  findById: (id: number): Card | undefined => {
+  findById: (uuid: string): Card | undefined => {
     const db = getDB();
-    const stmt = db.prepare("SELECT * FROM cards WHERE id = ?");
-    const row = stmt.get(id) as CardRow | undefined;
+    const stmt = db.prepare("SELECT * FROM cards WHERE uuid = ?");
+    const row = stmt.get(uuid) as CardRow | undefined;
     if (!row) return undefined;
     return rowToCard(row);
   },
@@ -66,22 +65,26 @@ export const Card = {
     assigneeName?: string;
   }): Card => {
     const db = getDB();
+
+    const uuid = crypto.randomUUID();
+
     const stmt = db.prepare(`
-      INSERT INTO cards (title, content, status, assignee, assigneeName)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO cards (uuid, title, content, status, assignee, assigneeName)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
-    const result = stmt.run(
+    stmt.run(
+      uuid,
       cardData.title,
       cardData.content || null,
       cardData.status || CardStatus.TODO,
       cardData.assignee || null,
       cardData.assigneeName || null,
     );
-    return Card.findById(result.lastInsertRowid as number)!;
+    return Card.findById(uuid)!;
   },
 
   findByIdAndUpdate: (
-    id: number,
+    uuid: string,
     updateData: {
       title?: string;
       content?: string;
@@ -113,21 +116,21 @@ export const Card = {
       setClauses.push("assigneeName = ?");
       params.push(updateData.assigneeName);
     }
-    params.push(id);
+    params.push(uuid);
     const stmt = db.prepare(
-      `UPDATE cards SET ${setClauses.join(", ")} WHERE id = ?`,
+      `UPDATE cards SET ${setClauses.join(", ")} WHERE uuid = ?`,
     );
     const result = stmt.run(...params);
     if (result.changes === 0) return undefined;
-    return Card.findById(id);
+    return Card.findById(uuid);
   },
 
-  findByIdAndDelete: (id: number): Card | undefined => {
-    const card = Card.findById(id);
+  findByIdAndDelete: (uuid: string): Card | undefined => {
+    const card = Card.findById(uuid);
     if (!card) return undefined;
     const db = getDB();
-    const stmt = db.prepare("DELETE FROM cards WHERE id = ?");
-    stmt.run(id);
+    const stmt = db.prepare("DELETE FROM cards WHERE uuid = ?");
+    stmt.run(uuid);
     return card;
   },
 };

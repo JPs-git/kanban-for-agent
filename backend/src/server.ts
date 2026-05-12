@@ -13,13 +13,20 @@ const version = fs
   .readFileSync(path.join(__dirname, "../../VERSION"), "utf-8")
   .trim();
 
-const env = process.env.NODE_ENV || "production";
+const envFromArgv = process.argv.find((arg) => arg.startsWith("NODE_ENV="));
+const envFromEnv = process.env.NODE_ENV;
+
+let env = envFromArgv ? envFromArgv.split("=")[1] : envFromEnv || "production";
+
 const envPath = path.join(
   __dirname,
   "../",
   `.env${env === "production" ? "" : `.${env}`}`,
 );
+
 dotenv.config({ path: envPath });
+
+process.env.NODE_ENV = env;
 
 export const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +61,7 @@ const startServer = () => {
     connectDB();
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV}`);
     });
   } catch (error) {
     console.error("Error starting server:", error);

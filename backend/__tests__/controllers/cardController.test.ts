@@ -5,7 +5,7 @@ import { app } from "../../src/server";
 
 jest.mock("../../src/models/Card", () => {
   interface MockCard {
-    id: number;
+    id: string;
     title: string;
     content: string;
     status: string;
@@ -16,7 +16,10 @@ jest.mock("../../src/models/Card", () => {
   }
 
   const mockCards: MockCard[] = [];
-  let nextId = 1;
+
+  const generateUUID = () => {
+    return `${Math.random().toString(16).substr(2, 8)}-${Math.random().toString(16).substr(2, 4)}-${Math.random().toString(16).substr(2, 4)}-${Math.random().toString(16).substr(2, 4)}-${Math.random().toString(16).substr(2, 12)}`;
+  };
 
   const mockCardModule = {
     CardStatus: {
@@ -27,7 +30,7 @@ jest.mock("../../src/models/Card", () => {
     },
     Card: {
       find: jest.fn().mockImplementation(() => mockCards),
-      findById: jest.fn().mockImplementation((id: number) => {
+      findById: jest.fn().mockImplementation((id: string) => {
         const card = mockCards.find((c) => c.id === id);
         return card || undefined;
       }),
@@ -42,7 +45,7 @@ jest.mock("../../src/models/Card", () => {
             assigneeName?: string;
           }) => {
             const newCard: MockCard = {
-              id: nextId++,
+              id: generateUUID(),
               title: cardData.title,
               content: cardData.content || "",
               status: cardData.status || "TODO",
@@ -57,7 +60,7 @@ jest.mock("../../src/models/Card", () => {
         ),
       findByIdAndUpdate: jest.fn().mockImplementation(
         (
-          id: number,
+          id: string,
           update: {
             title?: string;
             content?: string;
@@ -79,7 +82,7 @@ jest.mock("../../src/models/Card", () => {
           return updatedCard;
         },
       ),
-      findByIdAndDelete: jest.fn().mockImplementation((id: number) => {
+      findByIdAndDelete: jest.fn().mockImplementation((id: string) => {
         const index = mockCards.findIndex((c) => c.id === id);
         if (index === -1) {
           return undefined;
@@ -101,11 +104,41 @@ jest.mock("../../src/config/db", () => {
 });
 
 describe("Card Controller", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test("GET /api/cards should return all cards", async () => {
     const response = await request(app).get("/api/cards");
 
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
+  });
+
+  test("GET /api/cards/:id should return a single card", async () => {
+    const mockModule = jest.requireMock("../../src/models/Card");
+    mockModule.Card.findById.mockReturnValue({
+      id: "test-uuid",
+      title: "Test Card",
+      content: "Test content",
+      status: "TODO",
+    });
+
+    const response = await request(app).get("/api/cards/test-uuid");
+
+    expect(response.status).toBe(200);
+    expect(response.body.id).toBe("test-uuid");
+    expect(response.body.title).toBe("Test Card");
+  });
+
+  test("GET /api/cards/:id should return 404 if card not found", async () => {
+    const mockModule = jest.requireMock("../../src/models/Card");
+    mockModule.Card.findById.mockReturnValue(undefined);
+
+    const response = await request(app).get("/api/cards/non-existent-uuid");
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe("Card not found");
   });
 
   test("POST /api/cards should create a new card", async () => {
@@ -121,6 +154,9 @@ describe("Card Controller", () => {
     expect(response.body.title).toBe("New Card");
     expect(response.body.content).toBe("New content");
     expect(response.body.status).toBe(CardStatus.IN_PROGRESS);
+    expect(response.body.id).toBeDefined();
+    expect(typeof response.body.id).toBe("string");
+    expect(response.body.id.length).toBe(36);
   });
 
   test("POST /api/cards should return 400 if title is missing", async () => {
@@ -132,6 +168,19 @@ describe("Card Controller", () => {
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBe("Title is required");
+  });
+
+  test("POST /api/cards should generate UUID", async () => {
+    const cardData = {
+      title: "UUID Test Card",
+    };
+
+    const response = await request(app).post("/api/cards").send(cardData);
+
+    expect(response.status).toBe(201);
+    expect(response.body.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    );
   });
 
   test("PUT /api/cards/:id should update a card", async () => {
@@ -158,6 +207,7 @@ describe("Card Controller", () => {
     expect(response.body.title).toBe("Updated Title");
     expect(response.body.content).toBe("Updated content");
     expect(response.body.status).toBe(CardStatus.DONE);
+    expect(response.body.id).toBe(cardId);
   });
 
   test("PUT /api/cards/:id should return 404 if card not found", async () => {
@@ -165,18 +215,51 @@ describe("Card Controller", () => {
       title: "Updated Title",
     };
 
+    const invalidId = "invalid-uuid-12345";
     const response = await request(app)
-      .put("/api/cards/999999")
+      .put(`/api/cards/${invalidId}`)
       .send(updateData);
 
     expect(response.status).toBe(404);
     expect(response.body.error).toBe("Card not found");
   });
 
+  test("DELETE /api/cards/:id should delete a card", async () => {
+    const cardData = {
+      title: "Delete Test Card",
+    };
+
+    const createResponse = await request(app).post("/api/cards").send(cardData);
+    const cardId = createResponse.body.id;
+
+    const deleteResponse = await request(app).delete(`/api/cards/${cardId}`);
+
+    expect(deleteResponse.status).toBe(200);
+    expect(deleteResponse.body.message).toBe("Card deleted successfully");
+  });
+
   test("DELETE /api/cards/:id should return 404 if card not found", async () => {
-    const response = await request(app).delete("/api/cards/999999");
+    const invalidId = "invalid-uuid-12345";
+    const response = await request(app).delete(`/api/cards/${invalidId}`);
 
     expect(response.status).toBe(404);
     expect(response.body.error).toBe("Card not found");
+  });
+
+  test("GET /api/cards should return cards with UUIDs", async () => {
+    const mockModule = jest.requireMock("../../src/models/Card");
+    mockModule.Card.find.mockReturnValue([
+      { id: "test-uuid-1", title: "Card 1", content: "", status: "TODO" },
+      { id: "test-uuid-2", title: "Card 2", content: "", status: "TODO" },
+    ]);
+
+    const response = await request(app).get("/api/cards");
+
+    expect(response.status).toBe(200);
+    expect(response.body.length).toBe(2);
+    response.body.forEach((card: { id: string }) => {
+      expect(card.id).toBeDefined();
+      expect(typeof card.id).toBe("string");
+    });
   });
 });
