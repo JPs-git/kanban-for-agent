@@ -10,7 +10,7 @@ export const getCards = async (req: Request, res: Response) => {
   }
 };
 
-export const getCard = async (req: Request, res: Response) => {
+export const getCard = (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const cardId = Array.isArray(id) ? id[0] : id;

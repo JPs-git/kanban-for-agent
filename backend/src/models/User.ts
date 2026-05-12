@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { getDB } from "../config/sqlite.js";
 
 interface UserRow {
