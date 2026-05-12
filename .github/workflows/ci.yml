@@ -11,8 +11,8 @@ jobs:
   version-update:
     runs-on: ubuntu-latest
     if: |
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref =~ /^v[0-9]+\.[0-9]+$/)
-      || (github.event_name == 'push' && github.ref_name =~ /^v[0-9]+\.[0-9]+$/ && github.actor != 'dependabot[bot]')
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && contains(github.event.pull_request.base.ref, 'v') && contains(github.event.pull_request.base.ref, '.'))
+      || (github.event_name == 'push' && contains(github.ref_name, 'v') && contains(github.ref_name, '.') && github.actor != 'dependabot[bot]')
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +35,13 @@ jobs:
           VERSION_BASE=${BRANCH_NAME#v}
           echo "VERSION_BASE=$VERSION_BASE" >> $GITHUB_ENV
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Validate version branch format
+        run: |
+          if ! echo "${{ env.VERSION_BASE }}" | grep -qE '^[0-9]+\.[0-9]+$'; then
+            echo "Invalid version branch format: ${{ env.BRANCH_NAME }}"
+            exit 1
+          fi
 
       - name: Get current version
         id: current-version
