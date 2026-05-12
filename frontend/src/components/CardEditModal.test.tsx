@@ -21,6 +21,7 @@ describe('CardEditModal', () => {
   test('should auto-fill form with card data when modal opens', () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
+    const onDelete = vi.fn();
 
     render(
       <CardEditModal
@@ -28,6 +29,7 @@ describe('CardEditModal', () => {
         isOpen={true}
         onClose={onClose}
         onSave={onSave}
+        onDelete={onDelete}
         users={mockUsers}
       />
     );
@@ -46,6 +48,7 @@ describe('CardEditModal', () => {
   test('should reinitialize form when card id changes', () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
+    const onDelete = vi.fn();
 
     const { rerender } = render(
       <CardEditModal
@@ -53,6 +56,7 @@ describe('CardEditModal', () => {
         isOpen={true}
         onClose={onClose}
         onSave={onSave}
+        onDelete={onDelete}
         users={mockUsers}
       />
     );
@@ -74,6 +78,7 @@ describe('CardEditModal', () => {
         isOpen={true}
         onClose={onClose}
         onSave={onSave}
+        onDelete={onDelete}
         users={mockUsers}
       />
     );
@@ -87,6 +92,7 @@ describe('CardEditModal', () => {
   test('should call onSave with correct data when form is submitted', () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
+    const onDelete = vi.fn();
 
     render(
       <CardEditModal
@@ -94,6 +100,7 @@ describe('CardEditModal', () => {
         isOpen={true}
         onClose={onClose}
         onSave={onSave}
+        onDelete={onDelete}
         users={mockUsers}
       />
     );
@@ -118,6 +125,7 @@ describe('CardEditModal', () => {
   test('should not call onSave when title is empty', () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
+    const onDelete = vi.fn();
 
     render(
       <CardEditModal
@@ -125,6 +133,7 @@ describe('CardEditModal', () => {
         isOpen={true}
         onClose={onClose}
         onSave={onSave}
+        onDelete={onDelete}
         users={mockUsers}
       />
     );
@@ -141,6 +150,7 @@ describe('CardEditModal', () => {
   test('should return null when isOpen is false', () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
+    const onDelete = vi.fn();
 
     const { container } = render(
       <CardEditModal
@@ -148,6 +158,7 @@ describe('CardEditModal', () => {
         isOpen={false}
         onClose={onClose}
         onSave={onSave}
+        onDelete={onDelete}
         users={mockUsers}
       />
     );
@@ -158,6 +169,7 @@ describe('CardEditModal', () => {
   test('should return null when card is null', () => {
     const onSave = vi.fn();
     const onClose = vi.fn();
+    const onDelete = vi.fn();
 
     const { container } = render(
       <CardEditModal
@@ -165,10 +177,52 @@ describe('CardEditModal', () => {
         isOpen={true}
         onClose={onClose}
         onSave={onSave}
+        onDelete={onDelete}
         users={mockUsers}
       />
     );
 
     expect(container.firstChild).toBeNull();
+  });
+
+  test('should call onDelete when delete button is clicked', () => {
+    const onSave = vi.fn();
+    const onClose = vi.fn();
+    const onDelete = vi.fn();
+
+    render(
+      <CardEditModal
+        card={mockCard}
+        isOpen={true}
+        onClose={onClose}
+        onSave={onSave}
+        onDelete={onDelete}
+        users={mockUsers}
+      />
+    );
+
+    const deleteButton = screen.getByText('删除');
+    fireEvent.click(deleteButton);
+
+    expect(onDelete).toHaveBeenCalledWith('1');
+  });
+
+  test('should have delete button in modal', () => {
+    const onSave = vi.fn();
+    const onClose = vi.fn();
+    const onDelete = vi.fn();
+
+    render(
+      <CardEditModal
+        card={mockCard}
+        isOpen={true}
+        onClose={onClose}
+        onSave={onSave}
+        onDelete={onDelete}
+        users={mockUsers}
+      />
+    );
+
+    expect(screen.getByText('删除')).toBeInTheDocument();
   });
 });
