@@ -19,6 +19,8 @@ jobs:
       contains(github.event.pull_request.base.ref, 'v') && 
       contains(github.event.pull_request.base.ref, '.') &&
       startsWith(github.head_ref, 'patch/')
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
