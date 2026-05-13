@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   version-update:
@@ -104,17 +105,22 @@ jobs:
           git push origin HEAD:${{ env.VERSION_BUMP_BRANCH }} --force-with-lease
 
       - name: Create PR for version bump
+        id: create-pr
         run: |
-          gh pr create \
+          PR_URL=$(gh pr create \
             --base ${{ env.BASE_BRANCH }} \
             --head ${{ env.VERSION_BUMP_BRANCH }} \
             --title "chore: bump version to ${{ env.NEW_VERSION }}" \
-            --body "Auto-generated PR for version bump to ${{ env.NEW_VERSION }}"
+            --body "Auto-generated PR for version bump to ${{ env.NEW_VERSION }}" \
+            --json url --jq '.url')
+          echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
+          echo "Created version bump PR: $PR_URL"
 
-      - name: Merge version bump PR
+      - name: Enable auto-merge for version bump PR
         run: |
           PR_NUMBER=$(gh pr list --base ${{ env.BASE_BRANCH }} --head ${{ env.VERSION_BUMP_BRANCH }} --json number --jq '.[0].number')
-          gh pr merge $PR_NUMBER --squash --delete-branch
+          gh pr merge $PR_NUMBER --auto --squash --delete-branch
+          echo "Auto-merge enabled. PR will merge when all checks pass and review is complete."
 
   build-and-test:
     runs-on: ubuntu-latest
