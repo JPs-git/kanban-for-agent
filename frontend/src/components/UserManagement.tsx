@@ -25,18 +25,18 @@ const UserManagement: React.FC<UserManagementProps> = ({
   loading = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<"id" | "name">("id");
+  const [sortBy, setSortBy] = useState<"id" | "name">("name");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const filteredAndSortedUsers = users
     .filter((user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase())
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()),
     )
     .sort((a, b) => {
       if (sortBy === "id") {
-        return a._id.localeCompare(b._id);
+        return a.id.localeCompare(b.id);
       } else {
         return a.name.localeCompare(b.name);
       }
@@ -74,8 +74,8 @@ const UserManagement: React.FC<UserManagementProps> = ({
           onChange={(e) => setSortBy(e.target.value as "id" | "name")}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
-          <option value="id">按ID排序</option>
           <option value="name">按名称排序</option>
+          <option value="id">按ID排序</option>
         </select>
       </div>
 
@@ -84,19 +84,22 @@ const UserManagement: React.FC<UserManagementProps> = ({
       ) : (
         <div className="max-h-64 overflow-y-auto mb-4">
           {filteredAndSortedUsers.length === 0 ? (
-            <div className="text-center py-8 text-gray-400 text-sm">暂无用户</div>
+            <div className="text-center py-8 text-gray-400 text-sm">
+              暂无用户
+            </div>
           ) : (
             <div className="space-y-2">
               {filteredAndSortedUsers.map((user) => (
-                <div 
-                  key={user._id} 
+                <div
+                  key={user.id}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                 >
-                  <div>
-                    <span className="text-xs text-gray-400 block">ID: {user._id}</span>
-                    <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-gray-700 truncate">
+                      {user.name}
+                    </span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0">
                     <Button
                       variant="primary"
                       size="small"
@@ -119,7 +122,11 @@ const UserManagement: React.FC<UserManagementProps> = ({
         </div>
       )}
 
-      <Button variant="success" onClick={() => setIsAddFormOpen(true)} className="w-full">
+      <Button
+        variant="success"
+        onClick={() => setIsAddFormOpen(true)}
+        className="w-full"
+      >
         添加用户
       </Button>
 
@@ -133,7 +140,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
 
       {editingUser && (
         <UserForm
-          onSave={(name) => handleEditUser(editingUser._id, name)}
+          onSave={(name) => handleEditUser(editingUser.id, name)}
           onCancel={() => setEditingUser(null)}
           user={editingUser}
         />
@@ -142,7 +149,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
       {userToDelete && (
         <UserDeleteConfirm
           user={userToDelete}
-          onConfirm={() => handleDeleteUser(userToDelete._id)}
+          onConfirm={() => handleDeleteUser(userToDelete.id)}
           onCancel={() => setUserToDelete(null)}
         />
       )}

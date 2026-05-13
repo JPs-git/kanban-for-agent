@@ -10,6 +10,23 @@ export const getCards = async (req: Request, res: Response) => {
   }
 };
 
+export const getCard = (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const cardId = Array.isArray(id) ? id[0] : id;
+    
+    const card = Card.findById(cardId);
+    
+    if (!card) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+    
+    res.status(200).json(card);
+  } catch {
+    res.status(500).json({ error: 'Failed to get card' });
+  }
+};
+
 export const createCard = async (req: Request, res: Response) => {
   try {
     const { title, content, status, assignee, assigneeName } = req.body;
@@ -41,7 +58,7 @@ export const updateCard = async (req: Request, res: Response) => {
     
     const cardId = Array.isArray(id) ? id[0] : id;
     const card = Card.findByIdAndUpdate(
-      parseInt(cardId),
+      cardId,
       { title, content, status, assignee, assigneeName }
     );
     
@@ -63,7 +80,7 @@ export const deleteCard = async (req: Request, res: Response) => {
     const { id } = req.params;
     
     const cardId = Array.isArray(id) ? id[0] : id;
-    const card = Card.findByIdAndDelete(parseInt(cardId));
+    const card = Card.findByIdAndDelete(cardId);
     
     if (!card) {
       return res.status(404).json({ error: 'Card not found' });

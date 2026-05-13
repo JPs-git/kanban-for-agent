@@ -36,7 +36,7 @@ export const useUsers = () => {
   const updateUser = useCallback(async (id: string, name: string) => {
     try {
       const updatedUser = await userApi.updateUser(id, name);
-      setUsers(prev => prev.map(user => user._id === id ? updatedUser : user));
+      setUsers(prev => prev.map(user => user.id === id ? updatedUser : user));
       return updatedUser;
     } catch (err) {
       setError('Failed to update user');
@@ -48,7 +48,7 @@ export const useUsers = () => {
   const removeUser = useCallback(async (id: string) => {
     try {
       await userApi.deleteUser(id);
-      setUsers(prev => prev.filter(user => user._id !== id));
+      setUsers(prev => prev.filter(user => user.id !== id));
     } catch (err) {
       setError('Failed to delete user');
       console.error(err);
