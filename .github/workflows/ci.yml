@@ -109,8 +109,7 @@ jobs:
             --base ${{ env.BASE_BRANCH }} \
             --head ${{ env.VERSION_BUMP_BRANCH }} \
             --title "chore: bump version to ${{ env.NEW_VERSION }}" \
-            --body "Auto-generated PR for version bump to ${{ env.NEW_VERSION }}" \
-            --label "version-bump"
+            --body "Auto-generated PR for version bump to ${{ env.NEW_VERSION }}"
 
       - name: Merge version bump PR
         run: |
