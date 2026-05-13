@@ -22,7 +22,7 @@ class BackendService {
     return {
       NODE_ENV: 'production',
       PORT: config.serverPort.toString(),
-      SQLITE_PROD_PATH: path.join(config.dataPath, 'prod.db')
+      SQLITE_PATH: path.join(config.dataPath, 'prod.db')
     };
   }
 
@@ -74,7 +74,7 @@ class BackendService {
         env: {
           ...process.env,
           NODE_ENV: process.env.NODE_ENV || 'production',
-          SQLITE_PROD_PATH: path.join(config.dataPath, 'prod.db')
+          SQLITE_PATH: path.join(config.dataPath, 'prod.db')
         }
       });
 
