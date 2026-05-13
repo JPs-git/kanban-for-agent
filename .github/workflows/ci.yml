@@ -115,9 +115,7 @@ jobs:
 
       - name: Enable auto-merge for version bump PR
         run: |
-          gh pr merge \
-            --base ${{ env.BASE_BRANCH }} \
-            --head ${{ env.VERSION_BUMP_BRANCH }} \
+          gh pr merge ${{ env.VERSION_BUMP_BRANCH }} \
             --auto \
             --squash \
             --delete-branch
