@@ -101,7 +101,7 @@ jobs:
 
       - name: Push version bump branch
         run: |
-          git push origin HEAD:${{ env.VERSION_BUMP_BRANCH }}
+          git push origin HEAD:${{ env.VERSION_BUMP_BRANCH }} --force-with-lease
 
       - name: Create PR for version bump
         run: |
