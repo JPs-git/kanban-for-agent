@@ -48,7 +48,7 @@ jobs:
       - name: Get base branch version (target version)
         id: get-base-version
         run: |
-          BASE_VERSION=$(git show ${{ env.BASE_BRANCH }}:VERSION 2>/dev/null || echo "${{ env.VERSION_BASE }}.0")
+          BASE_VERSION=$(git show origin/${{ env.BASE_BRANCH }}:VERSION 2>/dev/null || echo "${{ env.VERSION_BASE }}.0")
           echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
           echo "Base branch ${{ env.BASE_BRANCH }} version: $BASE_VERSION"
 
