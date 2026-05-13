@@ -84,13 +84,36 @@ jobs:
       - name: Sync versions to all packages
         run: node scripts/version-sync.js
 
-      - name: Commit and push version changes to base branch
+      - name: Create version bump branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          VERSION_BUMP_BRANCH="version-bump/${{ env.BASE_BRANCH }}-${{ env.NEW_VERSION }}"
+          echo "VERSION_BUMP_BRANCH=$VERSION_BUMP_BRANCH" >> $GITHUB_ENV
+          git checkout -b $VERSION_BUMP_BRANCH
+
+      - name: Commit version changes
+        run: |
           git add VERSION package.json backend/package.json frontend/package.json kanban-cli/package.json
           git diff --cached --quiet || git commit -m "chore: bump version to ${{ env.NEW_VERSION }}"
-          git push origin ${{ env.BASE_BRANCH }}
+
+      - name: Push version bump branch
+        run: |
+          git push origin HEAD:${{ env.VERSION_BUMP_BRANCH }}
+
+      - name: Create PR for version bump
+        run: |
+          gh pr create \
+            --base ${{ env.BASE_BRANCH }} \
+            --head ${{ env.VERSION_BUMP_BRANCH }} \
+            --title "chore: bump version to ${{ env.NEW_VERSION }}" \
+            --body "Auto-generated PR for version bump to ${{ env.NEW_VERSION }}" \
+            --label "version-bump"
+
+      - name: Merge version bump PR
+        run: |
+          PR_NUMBER=$(gh pr list --base ${{ env.BASE_BRANCH }} --head ${{ env.VERSION_BUMP_BRANCH }} --json number --jq '.[0].number')
+          gh pr merge $PR_NUMBER --squash --delete-branch
 
   build-and-test:
     runs-on: ubuntu-latest
