@@ -5,7 +5,7 @@ on:
     branches: [v*, patch/*]
   pull_request:
     branches: [v*]
-    types: [opened, synchronize]
+    types: [opened, synchronize, closed]
 
 permissions:
   contents: write
@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'pull_request' && 
+      github.event.pull_request.merged == true &&
       contains(github.event.pull_request.base.ref, 'v') && 
       contains(github.event.pull_request.base.ref, '.') &&
       startsWith(github.head_ref, 'patch/')
@@ -36,7 +37,6 @@ jobs:
           VERSION_BASE=${BASE_BRANCH#v}
           echo "VERSION_BASE=$VERSION_BASE" >> $GITHUB_ENV
           echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
-          echo "HEAD_REF=${{ github.head_ref }}" >> $GITHUB_ENV
 
       - name: Validate version branch format
         run: |
@@ -48,22 +48,11 @@ jobs:
       - name: Get base branch version (target version)
         id: get-base-version
         run: |
-          BASE_VERSION=$(git show ${{ env.BASE_BRANCH }}:VERSION 2>/dev/null || echo "${{ env.VERSION_BASE }}.0")
+          BASE_VERSION=$(git show origin/${{ env.BASE_BRANCH }}:VERSION 2>/dev/null || echo "${{ env.VERSION_BASE }}.0")
           echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
           echo "Base branch ${{ env.BASE_BRANCH }} version: $BASE_VERSION"
 
-      - name: Get current patch branch version
-        id: get-current-version
-        run: |
-          if [ -f VERSION ]; then
-            CURRENT_VERSION=$(cat VERSION)
-          else
-            CURRENT_VERSION="${{ env.VERSION_BASE }}.0"
-          fi
-          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
-          echo "Current patch branch version: $CURRENT_VERSION"
-
-      - name: Calculate next version and compare
+      - name: Calculate next version
         id: calculate-version
         run: |
           BASE_MAJOR=$(echo "${{ env.BASE_VERSION }}" | cut -d. -f1)
@@ -74,48 +63,34 @@ jobs:
             BASE_PATCH=0
           fi
 
-          EXPECTED_PATCH=$((BASE_PATCH + 1))
-          EXPECTED_VERSION="${BASE_MAJOR}.${BASE_MINOR}.${EXPECTED_PATCH}"
+          NEW_PATCH=$((BASE_PATCH + 1))
+          NEW_VERSION="${BASE_MAJOR}.${BASE_MINOR}.${NEW_PATCH}"
 
-          CURRENT_MAJOR=$(echo "${{ env.CURRENT_VERSION }}" | cut -d. -f1)
-          CURRENT_MINOR=$(echo "${{ env.CURRENT_VERSION }}" | cut -d. -f2)
-          CURRENT_PATCH=$(echo "${{ env.CURRENT_VERSION }}" | cut -d. -f3)
+          echo "Current base branch version: ${{ env.BASE_VERSION }}"
+          echo "New version after merge: $NEW_VERSION"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
-          if [ -z "$CURRENT_PATCH" ]; then
-            CURRENT_PATCH=0
-          fi
+      - name: Checkout base branch
+        run: |
+          git checkout ${{ env.BASE_BRANCH }}
+          git pull origin ${{ env.BASE_BRANCH }}
 
-          echo "Expected version (base + 1): $EXPECTED_VERSION"
-          echo "Current version: ${{ env.CURRENT_VERSION }}"
-
-          if [ "$CURRENT_MAJOR" -eq "$BASE_MAJOR" ] && [ "$CURRENT_MINOR" -eq "$BASE_MINOR" ] && [ "$CURRENT_PATCH" -ge "$EXPECTED_PATCH" ]; then
-            echo "Version ${{ env.CURRENT_VERSION }} is already >= expected $EXPECTED_VERSION. No update needed."
-            echo "VERSION_NEEDS_UPDATE=false" >> $GITHUB_ENV
-          else
-            echo "Version needs update from ${{ env.CURRENT_VERSION }} to $EXPECTED_VERSION"
-            echo "VERSION_NEEDS_UPDATE=true" >> $GITHUB_ENV
-            echo "NEW_VERSION=$EXPECTED_VERSION" >> $GITHUB_ENV
-          fi
-
-      - name: Update VERSION file if needed
-        if: env.VERSION_NEEDS_UPDATE == 'true'
+      - name: Update VERSION file
         run: |
           echo "${{ env.NEW_VERSION }}" > VERSION
           echo "Updated VERSION to: ${{ env.NEW_VERSION }}"
           cat VERSION
 
-      - name: Sync versions to all packages if needed
-        if: env.VERSION_NEEDS_UPDATE == 'true'
+      - name: Sync versions to all packages
         run: node scripts/version-sync.js
 
-      - name: Commit and push version changes to patch branch if needed
-        if: env.VERSION_NEEDS_UPDATE == 'true'
+      - name: Commit and push version changes to base branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add VERSION package.json backend/package.json frontend/package.json kanban-cli/package.json
           git diff --cached --quiet || git commit -m "chore: bump version to ${{ env.NEW_VERSION }}"
-          git push origin HEAD:${{ github.head_ref }}
+          git push origin ${{ env.BASE_BRANCH }}
 
   build-and-test:
     runs-on: ubuntu-latest
