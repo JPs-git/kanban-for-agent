@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [v*, patch/*]
+    branches: [v*, patch/*, hotfix/*]
   pull_request:
-    branches: [v*]
+    branches: [v*, master]
     types: [opened, synchronize, closed]
 
 permissions:
@@ -16,10 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'pull_request' && 
-      github.event.pull_request.merged == true &&
-      contains(github.event.pull_request.base.ref, 'v') && 
-      contains(github.event.pull_request.base.ref, '.') &&
-      startsWith(github.head_ref, 'patch/')
+      github.event.pull_request.merged == true && (
+        (contains(github.event.pull_request.base.ref, 'v') && 
+         contains(github.event.pull_request.base.ref, '.') &&
+         startsWith(github.head_ref, 'patch/')) ||
+        (github.event.pull_request.base.ref == 'master' &&
+         startsWith(github.head_ref, 'hotfix/'))
+      )
     env:
       GH_TOKEN: ${{ secrets.RELEASE_PAT }}
     steps:
@@ -33,27 +36,20 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Extract version from base branch
-        id: extract-version
-        run: |
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          VERSION_BASE=${BASE_BRANCH#v}
-          echo "VERSION_BASE=$VERSION_BASE" >> $GITHUB_ENV
-          echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
-
-      - name: Validate version branch format
-        run: |
-          if ! echo "${{ env.VERSION_BASE }}" | grep -qE '^[0-9]+\.[0-9]+$'; then
-            echo "Invalid version branch format: ${{ env.BASE_BRANCH }}"
-            exit 1
-          fi
-
       - name: Get base branch version (target version)
         id: get-base-version
         run: |
-          BASE_VERSION=$(git show origin/${{ env.BASE_BRANCH }}:VERSION 2>/dev/null || echo "${{ env.VERSION_BASE }}.0")
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+          
+          if [[ "$BASE_BRANCH" == v* ]]; then
+            VERSION_BASE=${BASE_BRANCH#v}
+            BASE_VERSION=$(git show origin/${BASE_BRANCH}:VERSION 2>/dev/null || echo "${VERSION_BASE}.0")
+          else
+            BASE_VERSION=$(git show origin/${BASE_BRANCH}:VERSION 2>/dev/null || echo "0.0.0")
+          fi
           echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-          echo "Base branch ${{ env.BASE_BRANCH }} version: $BASE_VERSION"
+          echo "Base branch $BASE_BRANCH version: $BASE_VERSION"
 
       - name: Calculate next version
         id: calculate-version

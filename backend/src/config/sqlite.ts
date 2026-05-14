@@ -11,7 +11,9 @@ let dbPath: string;
 const baseDir = path.join(__dirname, "../..");
 
 if (process.env.SQLITE_PATH) {
-  dbPath = path.join(baseDir, process.env.SQLITE_PATH);
+  dbPath = path.isAbsolute(process.env.SQLITE_PATH)
+    ? process.env.SQLITE_PATH
+    : path.join(baseDir, process.env.SQLITE_PATH);
 } else {
   switch (NODE_ENV) {
     case "test":

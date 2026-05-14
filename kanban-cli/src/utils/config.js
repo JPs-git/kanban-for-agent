@@ -142,4 +142,5 @@ class Config {
   }
 }
 
+export { Config };
 export const config = new Config();
