@@ -8,13 +8,20 @@
     "kanban": "./src/cli-wrapper.js"
   },
   "scripts": {
-    "start": "node src/cli.js"
+    "start": "node src/cli.js",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },
   "dependencies": {
     "commander": "^12.0.0",
     "dotenv": "^16.4.5",
     "kanban-for-agent": "file:..",
     "yaml": "^2.4.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "jest": "^30.3.0",
+    "jest-mock": "^30.3.0"
   },
   "author": "Kanban Team",
   "license": "MIT"
