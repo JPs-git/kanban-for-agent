@@ -9,11 +9,11 @@ vi.mock('../services/api');
 
 describe('useKanban Hook', () => {
   const mockCards: Card[] = [
-    { id: '1', title: 'Test Card 1', description: 'Desc 1', status: CardStatus.TODO, userId: null },
-    { id: '2', title: 'Test Card 2', description: 'Desc 2', status: CardStatus.IN_PROGRESS, userId: 'user1' },
+    { id: '1', title: 'Test Card 1', content: 'Desc 1', status: CardStatus.TODO, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
+    { id: '2', title: 'Test Card 2', content: 'Desc 2', status: CardStatus.IN_PROGRESS, createdAt: '2024-01-02', updatedAt: '2024-01-02', assignee: 'user1' },
   ];
 
-  const mockNewCard: Card = { id: '3', title: 'New Card', description: 'New Desc', status: CardStatus.TODO, userId: null };
+  const mockNewCard: Card = { id: '3', title: 'New Card', content: 'New Desc', status: CardStatus.TODO, createdAt: '2024-01-03', updatedAt: '2024-01-03' };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -58,7 +58,7 @@ describe('useKanban Hook', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    const cardCreate: CardCreate = { title: 'New Card', description: 'New Desc' };
+    const cardCreate: CardCreate = { title: 'New Card', content: 'New Desc' };
     
     await act(async () => {
       await result.current.addCard(cardCreate);
@@ -79,7 +79,7 @@ describe('useKanban Hook', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    const cardCreate: CardCreate = { title: 'New Card', description: 'New Desc' };
+    const cardCreate: CardCreate = { title: 'New Card', content: 'New Desc' };
     
     await act(async () => {
       await expect(result.current.addCard(cardCreate)).rejects.toThrow();
@@ -128,7 +128,7 @@ describe('useKanban Hook', () => {
   });
 
   test('refreshes cards when fetchCards is called', async () => {
-    const newCards: Card[] = [{ id: '3', title: 'Refreshed', description: 'New', status: CardStatus.TODO, userId: null }];
+    const newCards: Card[] = [{ id: '3', title: 'Refreshed', content: 'New', status: CardStatus.TODO, createdAt: '2024-01-03', updatedAt: '2024-01-03' }];
     (api.getCards as vi.Mock).mockResolvedValueOnce(mockCards).mockResolvedValueOnce(newCards);
 
     const { result } = renderHook(() => useKanban());
