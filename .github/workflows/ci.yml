@@ -24,6 +24,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install kanban-cli dependencies
+        run: cd kanban-cli && npm install --ignore-scripts && cd ..
+        shell: bash
+
       - name: Lint
         run: npm run lint
 
