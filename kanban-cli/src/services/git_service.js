@@ -32,13 +32,23 @@ class GitService {
     try {
       if (fs.existsSync(this.repoPath) && fs.existsSync(path.join(this.repoPath, '.git'))) {
         logger.info(`Pulling latest changes from ${repoBranch}...`);
-        const result = spawnSync('git', ['pull', 'origin', repoBranch], {
+        const fetchResult = spawnSync('git', ['fetch', 'origin', repoBranch], {
           cwd: this.repoPath,
           stdio: ['ignore', 'pipe', 'pipe']
         });
 
-        if (result.status !== 0) {
-          logger.error(`Git pull failed: ${result.stderr.toString()}`);
+        if (fetchResult.status !== 0) {
+          logger.error(`Git fetch failed: ${fetchResult.stderr.toString()}`);
+          return false;
+        }
+
+        const resetResult = spawnSync('git', ['reset', '--hard', `origin/${repoBranch}`], {
+          cwd: this.repoPath,
+          stdio: ['ignore', 'pipe', 'pipe']
+        });
+
+        if (resetResult.status !== 0) {
+          logger.error(`Git reset failed: ${resetResult.stderr.toString()}`);
           return false;
         }
         logger.info('Pull completed successfully');
