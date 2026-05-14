@@ -5,14 +5,17 @@ import Database from 'better-sqlite3';
 describe('MigrationManager', () => {
   let db: Database.Database;
   let manager: MigrationManager;
+  let consoleErrorMock: jest.SpyInstance;
 
   beforeEach(() => {
     db = new Database(':memory:');
     manager = new MigrationManager(db);
+    consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
     db.close();
+    consoleErrorMock.mockRestore();
   });
 
   test('should initialize schema_migrations table', () => {

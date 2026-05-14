@@ -1,197 +1,41 @@
 name: CI
 
 on:
-  push:
-    branches: [v*, patch/*, hotfix/*, init/*]
   pull_request:
     branches: [v*, master]
-    types: [opened, synchronize, closed]
+    types: [opened, synchronize]
+  push:
+    branches: [v*, master]
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
-  version-update:
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request' && 
-      github.event.pull_request.merged == true && (
-        (contains(github.event.pull_request.base.ref, 'v') && 
-         contains(github.event.pull_request.base.ref, '.') &&
-         startsWith(github.head_ref, 'patch/')) ||
-        (github.event.pull_request.base.ref == 'master' &&
-         startsWith(github.head_ref, 'hotfix/')) ||
-        (contains(github.event.pull_request.base.ref, 'v') && 
-         contains(github.event.pull_request.base.ref, '.') &&
-         startsWith(github.head_ref, 'init/'))
-      )
-    env:
-      GH_TOKEN: ${{ secrets.RELEASE_PAT }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_PAT }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Check if this is init branch
-        id: check-init
-        run: |
-          HEAD_REF="${{ github.head_ref }}"
-          if [[ "$HEAD_REF" == init/* ]]; then
-            echo "IS_INIT=true" >> $GITHUB_OUTPUT
-            echo "Init branch detected: $HEAD_REF"
-          else
-            echo "IS_INIT=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Get base branch version (for init branch)
-        if: steps.check-init.outputs.IS_INIT == 'true'
-        id: get-init-version
-        run: |
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          VERSION_BASE=${BASE_BRANCH#v}
-          INIT_VERSION="${VERSION_BASE}.0"
-          echo "INIT_VERSION=$INIT_VERSION" >> $GITHUB_ENV
-          echo "Setting initial version from branch name: $INIT_VERSION"
-
-      - name: Get base branch version (target version)
-        if: steps.check-init.outputs.IS_INIT != 'true'
-        id: get-base-version
-        run: |
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
-          
-          if [[ "$BASE_BRANCH" == v* ]]; then
-            VERSION_BASE=${BASE_BRANCH#v}
-            BASE_VERSION=$(git show origin/${BASE_BRANCH}:VERSION 2>/dev/null || echo "${VERSION_BASE}.0")
-          else
-            BASE_VERSION=$(git show origin/${BASE_BRANCH}:VERSION 2>/dev/null || echo "0.0.0")
-          fi
-          echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-          echo "Base branch $BASE_BRANCH version: $BASE_VERSION"
-
-      - name: Calculate next version (for non-init branches)
-        if: steps.check-init.outputs.IS_INIT != 'true'
-        id: calculate-version
-        run: |
-          BASE_MAJOR=$(echo "${{ env.BASE_VERSION }}" | cut -d. -f1)
-          BASE_MINOR=$(echo "${{ env.BASE_VERSION }}" | cut -d. -f2)
-          BASE_PATCH=$(echo "${{ env.BASE_VERSION }}" | cut -d. -f3)
-
-          if [ -z "$BASE_PATCH" ]; then
-            BASE_PATCH=0
-          fi
-
-          NEW_PATCH=$((BASE_PATCH + 1))
-          NEW_VERSION="${BASE_MAJOR}.${BASE_MINOR}.${NEW_PATCH}"
-
-          echo "Current base branch version: ${{ env.BASE_VERSION }}"
-          echo "New version after merge: $NEW_VERSION"
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-
-      - name: Set NEW_VERSION for init branch
-        if: steps.check-init.outputs.IS_INIT == 'true'
-        run: |
-          echo "NEW_VERSION=${{ env.INIT_VERSION }}" >> $GITHUB_ENV
-          echo "Using init version: ${{ env.INIT_VERSION }}"
-
-      - name: Checkout base branch
-        run: |
-          git checkout ${{ github.event.pull_request.base.ref }}
-          git pull origin ${{ github.event.pull_request.base.ref }}
-
-      - name: Update VERSION file
-        run: |
-          echo "${{ env.NEW_VERSION }}" > VERSION
-          echo "Updated VERSION to: ${{ env.NEW_VERSION }}"
-          cat VERSION
-
-      - name: Sync versions to all packages
-        run: node scripts/version-sync.js
-
-      - name: Update lockfile for new version
-        run: npm install --package-lock-only
-
-      - name: Create version bump branch
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          VERSION_BUMP_BRANCH="version-bump/${{ github.event.pull_request.base.ref }}-${{ env.NEW_VERSION }}"
-          echo "VERSION_BUMP_BRANCH=$VERSION_BUMP_BRANCH" >> $GITHUB_ENV
-          git checkout -b $VERSION_BUMP_BRANCH
-
-      - name: Commit version changes
-        run: |
-          git add VERSION package.json backend/package.json frontend/package.json kanban-cli/package.json package-lock.json
-          git diff --cached --quiet || git commit -m "chore: bump version to ${{ env.NEW_VERSION }}"
-
-      - name: Push version bump branch
-        run: |
-          git push origin HEAD:${{ env.VERSION_BUMP_BRANCH }} --force-with-lease
-
-      - name: Create PR for version bump
-        run: |
-          gh pr create \
-            --base ${{ github.event.pull_request.base.ref }} \
-            --head ${{ env.VERSION_BUMP_BRANCH }} \
-            --title "chore: bump version to ${{ env.NEW_VERSION }}" \
-            --body "Auto-generated PR for version bump to ${{ env.NEW_VERSION }}"
-          echo "Created version bump PR"
-
-      - name: Enable auto-merge for version bump PR
-        run: |
-          gh pr merge ${{ env.VERSION_BUMP_BRANCH }} \
-            --auto \
-            --squash \
-            --delete-branch
-          echo "Auto-merge enabled. PR will merge when all checks pass and review is complete."
-
   build-and-test:
     runs-on: ubuntu-latest
-    needs: []
     steps:
-      - name: Check if this is a version bump PR
-        id: check-skip
-        run: |
-          BRANCH="${{ github.head_ref }}"
-          if [[ "$BRANCH" == version-bump/* ]]; then
-            echo "SKIP_BUILD=true" >> $GITHUB_OUTPUT
-            echo "Skipping build-and-test (version bump PR)"
-          else
-            echo "SKIP_BUILD=false" >> $GITHUB_OUTPUT
-          fi
-
       - uses: actions/checkout@v4
-        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
 
       - name: Setup Node.js
-        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Install dependencies
-        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
         run: npm ci
 
+      - name: Install kanban-cli dependencies
+        run: cd kanban-cli && npm install --ignore-scripts && cd ..
+        shell: bash
+
       - name: Lint
-        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
         run: npm run lint
 
       - name: Build
-        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
         run: npm run build
 
-      - name: Run tests (unit)
-        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
+      - name: Run unit tests
         run: npm run test:unit
 
-      - name: Fake success for version bump PR
-        if: steps.check-skip.outputs.SKIP_BUILD == 'true'
-        run: echo "Build skipped; Status reported as success for version bump PR"
+      - name: Run integration tests
+        run: npm run test:integration
