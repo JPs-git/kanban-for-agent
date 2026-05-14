@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [v*, patch/*, hotfix/*]
+    branches: [v*, patch/*, hotfix/*, init/*]
   pull_request:
     branches: [v*, master]
     types: [opened, synchronize, closed]
@@ -21,7 +21,10 @@ jobs:
          contains(github.event.pull_request.base.ref, '.') &&
          startsWith(github.head_ref, 'patch/')) ||
         (github.event.pull_request.base.ref == 'master' &&
-         startsWith(github.head_ref, 'hotfix/'))
+         startsWith(github.head_ref, 'hotfix/')) ||
+        (contains(github.event.pull_request.base.ref, 'v') && 
+         contains(github.event.pull_request.base.ref, '.') &&
+         startsWith(github.head_ref, 'init/'))
       )
     env:
       GH_TOKEN: ${{ secrets.RELEASE_PAT }}
@@ -36,7 +39,29 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Check if this is init branch
+        id: check-init
+        run: |
+          HEAD_REF="${{ github.head_ref }}"
+          if [[ "$HEAD_REF" == init/* ]]; then
+            echo "IS_INIT=true" >> $GITHUB_OUTPUT
+            echo "Init branch detected: $HEAD_REF"
+          else
+            echo "IS_INIT=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get base branch version (for init branch)
+        if: steps.check-init.outputs.IS_INIT == 'true'
+        id: get-init-version
+        run: |
+          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          VERSION_BASE=${BASE_BRANCH#v}
+          INIT_VERSION="${VERSION_BASE}.0"
+          echo "INIT_VERSION=$INIT_VERSION" >> $GITHUB_ENV
+          echo "Setting initial version from branch name: $INIT_VERSION"
+
       - name: Get base branch version (target version)
+        if: steps.check-init.outputs.IS_INIT != 'true'
         id: get-base-version
         run: |
           BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
@@ -51,7 +76,8 @@ jobs:
           echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
           echo "Base branch $BASE_BRANCH version: $BASE_VERSION"
 
-      - name: Calculate next version
+      - name: Calculate next version (for non-init branches)
+        if: steps.check-init.outputs.IS_INIT != 'true'
         id: calculate-version
         run: |
           BASE_MAJOR=$(echo "${{ env.BASE_VERSION }}" | cut -d. -f1)
@@ -69,10 +95,16 @@ jobs:
           echo "New version after merge: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
+      - name: Set NEW_VERSION for init branch
+        if: steps.check-init.outputs.IS_INIT == 'true'
+        run: |
+          echo "NEW_VERSION=${{ env.INIT_VERSION }}" >> $GITHUB_ENV
+          echo "Using init version: ${{ env.INIT_VERSION }}"
+
       - name: Checkout base branch
         run: |
-          git checkout ${{ env.BASE_BRANCH }}
-          git pull origin ${{ env.BASE_BRANCH }}
+          git checkout ${{ github.event.pull_request.base.ref }}
+          git pull origin ${{ github.event.pull_request.base.ref }}
 
       - name: Update VERSION file
         run: |
@@ -87,7 +119,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          VERSION_BUMP_BRANCH="version-bump/${{ env.BASE_BRANCH }}-${{ env.NEW_VERSION }}"
+          VERSION_BUMP_BRANCH="version-bump/${{ github.event.pull_request.base.ref }}-${{ env.NEW_VERSION }}"
           echo "VERSION_BUMP_BRANCH=$VERSION_BUMP_BRANCH" >> $GITHUB_ENV
           git checkout -b $VERSION_BUMP_BRANCH
 
@@ -103,7 +135,7 @@ jobs:
       - name: Create PR for version bump
         run: |
           gh pr create \
-            --base ${{ env.BASE_BRANCH }} \
+            --base ${{ github.event.pull_request.base.ref }} \
             --head ${{ env.VERSION_BUMP_BRANCH }} \
             --title "chore: bump version to ${{ env.NEW_VERSION }}" \
             --body "Auto-generated PR for version bump to ${{ env.NEW_VERSION }}"

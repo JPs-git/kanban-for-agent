@@ -1,11 +1,13 @@
 ## 分支命名规则
+
 - master: 主分支, 开启了分支保护, 禁止直接push, 需要PR
 - v*.*: 版本分支, 开启了分支保护, 禁止直接push, 需要PR
-- patch/*: 特性分支, 需要从版本分支签出, 推送前需要rebase操作
+- patch/\*: 特性分支, 需要从版本分支签出, 推送前需要rebase操作
 
 ## 关于git推送
+
 1. master分支已经开启了分支保护, 不要直接推送到master分支
-2. 版本分支vx.x分支开启了分支保护, 不允许直接push到版本
+2. 版本分支vx.x分支开启了分支保护, 不允许直接push到版本分支
 3. 推送patch分支之前需要进行rebase操作, 流程如下:
    # 1. 获取远程仓库最新数据
    git fetch origin
@@ -19,4 +21,4 @@
    # 强烈推荐使用 --force-with-lease，它更安全，不会覆盖别人新推的提交
    git push --force-with-lease origin patch
 4. **禁止使用** --force --no-verify强制推送
-
+5. 推送patch分支后使用gh pr create 创建PR, 目标是版本分支,启用自动合并 gh pr merge --auto --squash --delete-branch
