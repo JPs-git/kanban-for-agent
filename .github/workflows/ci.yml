@@ -115,6 +115,9 @@ jobs:
       - name: Sync versions to all packages
         run: node scripts/version-sync.js
 
+      - name: Update lockfile for new version
+        run: npm install --package-lock-only
+
       - name: Create version bump branch
         run: |
           git config user.name "github-actions[bot]"
@@ -125,7 +128,7 @@ jobs:
 
       - name: Commit version changes
         run: |
-          git add VERSION package.json backend/package.json frontend/package.json kanban-cli/package.json
+          git add VERSION package.json backend/package.json frontend/package.json kanban-cli/package.json package-lock.json
           git diff --cached --quiet || git commit -m "chore: bump version to ${{ env.NEW_VERSION }}"
 
       - name: Push version bump branch
