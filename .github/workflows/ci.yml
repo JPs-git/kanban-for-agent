@@ -22,20 +22,30 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm ci
+        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
+        run: HUSKY=0 npm ci
 
       - name: Install kanban-cli dependencies
-        run: cd kanban-cli && npm install --ignore-scripts && cd ..
+        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
+        run: cd kanban-cli && HUSKY=0 npm install --ignore-scripts && cd ..
         shell: bash
 
+      - name: Setup Husky
+        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
+        run: npx husky install
+
       - name: Lint
+        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
         run: npm run lint
 
       - name: Build
+        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
         run: npm run build
 
       - name: Run unit tests
+        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
         run: npm run test:unit
 
       - name: Run integration tests
+        if: steps.check-skip.outputs.SKIP_BUILD != 'true'
         run: npm run test:integration
