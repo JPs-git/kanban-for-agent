@@ -1,6 +1,6 @@
 {
   "name": "kanban-for-agent",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Kanban full-stack application for syncing human and agent work progress",
   "main": "index.js",
   "scripts": {
