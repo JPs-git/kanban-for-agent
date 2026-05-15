@@ -1,93 +1,69 @@
-import { Request, Response } from 'express';
-import { Card, CardStatus } from '../models/Card.js';
+import { Request, Response, NextFunction } from 'express';
+import { CardService } from '../services';
+import { SQLiteCardRepository } from '../repositories';
+import { getParam } from '../utils/request';
 
-export const getCards = async (req: Request, res: Response) => {
+const cardRepository = new SQLiteCardRepository();
+const cardService = new CardService(cardRepository);
+
+export const getCards = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const cards = Card.find();
+    const cards = cardService.find();
     res.status(200).json(cards);
-  } catch {
-    res.status(500).json({ error: 'Failed to get cards' });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const getCard = (req: Request, res: Response) => {
+export const getCard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
-    const cardId = Array.isArray(id) ? id[0] : id;
-    
-    const card = Card.findById(cardId);
-    
-    if (!card) {
-      return res.status(404).json({ error: 'Card not found' });
-    }
-    
-    res.status(200).json(card);
-  } catch {
-    res.status(500).json({ error: 'Failed to get card' });
-  }
-};
-
-export const createCard = async (req: Request, res: Response) => {
-  try {
-    const { title, content, status, assignee, assigneeName } = req.body;
-    
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
-    
-    const savedCard = Card.create({
-      title,
-      content,
-      status: status || CardStatus.TODO,
-      assignee,
-      assigneeName
-    });
-    res.status(201).json(savedCard);
-  } catch {
-    res.status(500).json({ error: 'Failed to create card' });
-  }
-};
-
-export const updateCard = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { title, content, status, assignee, assigneeName } = req.body;
-    
-    console.log('Updating card with id:', id);
-    console.log('Update data:', { title, content, status, assignee, assigneeName });
-    
-    const cardId = Array.isArray(id) ? id[0] : id;
-    const card = Card.findByIdAndUpdate(
-      cardId,
-      { title, content, status, assignee, assigneeName }
-    );
-    
-    console.log('Updated card:', card);
-    
-    if (!card) {
-      return res.status(404).json({ error: 'Card not found' });
-    }
-    
+    const cardId = getParam(req, 'id')!;
+    const card = cardService.findById(cardId);
     res.status(200).json(card);
   } catch (error) {
-    console.error('Error updating card:', error);
-    res.status(500).json({ error: 'Failed to update card' });
+    next(error);
   }
 };
 
-export const deleteCard = async (req: Request, res: Response) => {
+export const createCard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
-    
-    const cardId = Array.isArray(id) ? id[0] : id;
-    const card = Card.findByIdAndDelete(cardId);
-    
-    if (!card) {
-      return res.status(404).json({ error: 'Card not found' });
-    }
-    
+    const { title, content, status, assignee, assigneeName } = req.body;
+    const savedCard = cardService.create({
+      title,
+      content,
+      status,
+      assignee,
+      assigneeName,
+    });
+    res.status(201).json(savedCard);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateCard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const cardId = getParam(req, 'id')!;
+    const { title, content, status, assignee, assigneeName } = req.body;
+    const card = cardService.update(cardId, {
+      title,
+      content,
+      status,
+      assignee,
+      assigneeName,
+    });
+    res.status(200).json(card);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteCard = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const cardId = getParam(req, 'id')!;
+    cardService.delete(cardId);
     res.status(200).json({ message: 'Card deleted successfully' });
-  } catch {
-    res.status(500).json({ error: 'Failed to delete card' });
+  } catch (error) {
+    next(error);
   }
 };

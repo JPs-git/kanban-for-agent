@@ -4,37 +4,27 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const NODE_ENV = process.env.NODE_ENV || "development";
-
-let dbPath: string;
 const baseDir = path.join(__dirname, "../..");
 
-if (process.env.SQLITE_PATH) {
-  dbPath = path.isAbsolute(process.env.SQLITE_PATH)
-    ? process.env.SQLITE_PATH
-    : path.join(baseDir, process.env.SQLITE_PATH);
-} else {
+const getDBPath = (): string => {
+  if (process.env.SQLITE_PATH) {
+    return path.isAbsolute(process.env.SQLITE_PATH)
+      ? process.env.SQLITE_PATH
+      : path.join(baseDir, process.env.SQLITE_PATH);
+  }
+  
+  const NODE_ENV = process.env.NODE_ENV || "development";
   switch (NODE_ENV) {
     case "test":
-      dbPath =
-        process.env.SQLITE_TEST_PATH || path.join(baseDir, "data/test.db");
-      break;
+      return process.env.SQLITE_TEST_PATH || path.join(baseDir, "data/test.db");
     case "production":
-      dbPath =
-        process.env.SQLITE_PROD_PATH || path.join(baseDir, "data/prod.db");
-      break;
+      return process.env.SQLITE_PROD_PATH || path.join(baseDir, "data/prod.db");
     default:
-      dbPath = process.env.SQLITE_DEV_PATH || path.join(baseDir, "data/dev.db");
+      return process.env.SQLITE_DEV_PATH || path.join(baseDir, "data/dev.db");
   }
-}
+};
 
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
-let db: Database.Database;
+let db: Database.Database | null = null;
 
 const tableExists = (db: Database.Database, tableName: string): boolean => {
   const result = db
@@ -81,7 +71,13 @@ const recreateTableWithUUID = (
   }
 };
 
-export const initDB = () => {
+export const initDB = (customPath?: string): Database.Database => {
+  const dbPath = customPath || getDBPath();
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+  
   db = new Database(dbPath);
   db.pragma("journal_mode = WAL");
 
@@ -133,9 +129,17 @@ export const initDB = () => {
   return db;
 };
 
-export const getDB = () => {
+export const getDB = (): Database.Database => {
   if (!db) {
     initDB();
   }
-  return db;
+  return db!;
+};
+
+export const resetDB = (customPath?: string): Database.Database => {
+  if (db) {
+    db.close();
+    db = null;
+  }
+  return initDB(customPath);
 };

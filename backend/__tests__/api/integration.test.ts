@@ -62,7 +62,7 @@ describe("API Integration Tests", () => {
       const response = await request(app).get("/api/cards/non-existent-uuid");
 
       expect(response.status).toBe(404);
-      expect(response.body.error).toBe("Card not found");
+      expect(response.body.error.message).toBe("Card not found");
     });
 
     test("PUT /api/cards/:id should update a card", async () => {
@@ -87,7 +87,7 @@ describe("API Integration Tests", () => {
         });
 
       expect(response.status).toBe(404);
-      expect(response.body.error).toBe("Card not found");
+      expect(response.body.error.message).toBe("Card not found");
     });
 
     test("POST /api/cards should return 400 without title", async () => {
@@ -96,7 +96,7 @@ describe("API Integration Tests", () => {
       });
 
       expect(response.status).toBe(400);
-      expect(response.body.error).toBe("Title is required");
+      expect(response.body.error.message).toBe("Title is required");
     });
 
     test("DELETE /api/cards/:id should delete a card", async () => {
@@ -115,7 +115,7 @@ describe("API Integration Tests", () => {
       );
 
       expect(response.status).toBe(404);
-      expect(response.body.error).toBe("Card not found");
+      expect(response.body.error.message).toBe("Card not found");
     });
   });
 
@@ -161,7 +161,7 @@ describe("API Integration Tests", () => {
       const response = await request(app).get("/api/users/non-existent-uuid");
 
       expect(response.status).toBe(404);
-      expect(response.body.error).toBe("User not found");
+      expect(response.body.error.message).toBe("User not found");
     });
 
     test("PUT /api/users/:id should update a user", async () => {
@@ -184,14 +184,14 @@ describe("API Integration Tests", () => {
         });
 
       expect(response.status).toBe(404);
-      expect(response.body.error).toBe("User not found");
+      expect(response.body.error.message).toBe("User not found");
     });
 
     test("POST /api/users should return 400 without name", async () => {
       const response = await request(app).post("/api/users").send({});
 
       expect(response.status).toBe(400);
-      expect(response.body.error).toBe("Name is required");
+      expect(response.body.error.message).toBe("Name is required");
     });
 
     test("DELETE /api/users/:id should delete a user", async () => {
@@ -210,7 +210,7 @@ describe("API Integration Tests", () => {
       );
 
       expect(response.status).toBe(404);
-      expect(response.body.error).toBe("User not found");
+      expect(response.body.error.message).toBe("User not found");
     });
   });
 

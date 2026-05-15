@@ -136,7 +136,8 @@ describe("Card Controller", () => {
     const response = await request(app).get("/api/cards/non-existent-uuid");
 
     expect(response.status).toBe(404);
-    expect(response.body.error).toBe("Card not found");
+    expect(response.body.error.message).toBe("Card not found");
+    expect(response.body.error.code).toBe("NOT_FOUND");
   });
 
   test("POST /api/cards should create a new card", async () => {
@@ -165,7 +166,8 @@ describe("Card Controller", () => {
     const response = await request(app).post("/api/cards").send(cardData);
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe("Title is required");
+    expect(response.body.error.message).toBe("Title is required");
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
   });
 
   test("POST /api/cards should generate UUID", async () => {
@@ -185,7 +187,7 @@ describe("Card Controller", () => {
     const cardData = {
       title: "Test Card",
       content: "Test content",
-      status: CardStatus.TODO,
+      status: CardStatus.IN_PROGRESS,
     };
 
     const createResponse = await request(app).post("/api/cards").send(cardData);
@@ -219,7 +221,8 @@ describe("Card Controller", () => {
       .send(updateData);
 
     expect(response.status).toBe(404);
-    expect(response.body.error).toBe("Card not found");
+    expect(response.body.error.message).toBe("Card not found");
+    expect(response.body.error.code).toBe("NOT_FOUND");
   });
 
   test("DELETE /api/cards/:id should delete a card", async () => {
@@ -241,7 +244,8 @@ describe("Card Controller", () => {
     const response = await request(app).delete(`/api/cards/${invalidId}`);
 
     expect(response.status).toBe(404);
-    expect(response.body.error).toBe("Card not found");
+    expect(response.body.error.message).toBe("Card not found");
+    expect(response.body.error.code).toBe("NOT_FOUND");
   });
 
   test("GET /api/cards should return cards with UUIDs", async () => {
