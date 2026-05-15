@@ -1,6 +1,19 @@
 import { logger } from '../utils/logger.js';
 import { BackendService } from '../services/backend_service.js';
 import { config } from '../utils/config.js';
+import {
+  cards,
+  cardGet,
+  cardCreate,
+  cardUpdate,
+  cardDelete,
+  cardGetHelp,
+  cardCreateHelp,
+  cardUpdateHelp,
+  cardDeleteHelp,
+  __setApiClient as __setCardApiClient,
+  __setLogger as __setCardLogger,
+} from './card.js';
 
 let BackendServiceClass = BackendService;
 let loggerInstance = logger;
@@ -11,7 +24,21 @@ export function __setBackendService(service) {
 
 export function __setLogger(log) {
   loggerInstance = log;
+  __setCardLogger(log);
 }
+
+export {
+  cards,
+  cardGet,
+  cardCreate,
+  cardUpdate,
+  cardDelete,
+  cardGetHelp,
+  cardCreateHelp,
+  cardUpdateHelp,
+  cardDeleteHelp,
+  __setCardApiClient,
+};
 
 export async function deploy(repoUrl) {
   const backendService = new BackendServiceClass();
