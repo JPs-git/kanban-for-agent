@@ -140,3 +140,18 @@ External integrations:
 - SQLite database for persistence
 - REST API for frontend communication
 - CLI tool for deployment and management
+
+## Frontend Routing
+
+### Pages
+
+| Page | Path | Description |
+|------|------|-------------|
+| Home | `/` | 首页，显示看板组件 |
+| About | `/about` | 关于页，显示版本信息和环境信息 |
+| NotFound | `*` | 404 页面，处理未匹配路由 |
+
+### Navigation
+
+- **Global Header**: 顶部导航栏，包含页面切换链接
+- **Navigation Links**: 使用 react-router-dom Link 组件实现无刷新页面切换

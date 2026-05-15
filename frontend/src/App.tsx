@@ -1,25 +1,19 @@
-import { useState, useEffect } from 'react';
-import KanbanBoard from './components/KanbanBoard';
-import { getVersion } from './services/api';
-import type { VersionInfo } from './services/api';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import { routes } from './routes';
 
 function App() {
-  const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null);
-
-  useEffect(() => {
-    getVersion().then(setVersionInfo).catch(() => {});
-  }, []);
-
   return (
-    <div className="app min-h-screen flex flex-col">
-      <KanbanBoard />
-      {versionInfo && (
-        <footer className="fixed bottom-0 left-0 right-0 bg-gray-800 text-gray-400 text-xs py-2 px-4 text-center">
-          Version: {versionInfo.version} | Environment: {versionInfo.environment}
-        </footer>
-      )}
-    </div>
+    <Router>
+      <Layout>
+        <Routes>
+          {routes.map((route, index) => (
+            <Route key={index} path={route.path} element={route.element} />
+          ))}
+        </Routes>
+      </Layout>
+    </Router>
   );
 }
 
-export default App
+export default App;
