@@ -1,87 +1,57 @@
-import { Request, Response } from 'express';
-import { User } from '../models/User.js';
+import { Request, Response, NextFunction } from 'express';
+import { UserService } from '../services';
+import { SQLiteUserRepository } from '../repositories';
+import { getParam } from '../utils/request';
 
-export const getUsers = (req: Request, res: Response) => {
+const userRepository = new SQLiteUserRepository();
+const userService = new UserService(userRepository);
+
+export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const users = User.find();
+    const users = userService.find();
     res.status(200).json(users);
-  } catch {
-    res.status(500).json({ error: 'Failed to get users' });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const getUser = (req: Request, res: Response) => {
+export const getUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
-    const userId = Array.isArray(id) ? id[0] : id;
-    
-    const user = User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
+    const userId = getParam(req, 'id')!;
+    const user = userService.findById(userId);
     res.status(200).json(user);
-  } catch {
-    res.status(500).json({ error: 'Failed to get user' });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const createUser = (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { name } = req.body;
-    
-    if (!name || name.trim() === '') {
-      return res.status(400).json({ error: 'Name is required' });
-    }
-    
-    const savedUser = User.create({
-      name: name.trim()
-    });
+    const savedUser = userService.create({ name });
     res.status(201).json(savedUser);
-  } catch {
-    res.status(500).json({ error: 'Failed to create user' });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const updateUser = (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
+    const userId = getParam(req, 'id')!;
     const { name } = req.body;
-    
-    if (!name || name.trim() === '') {
-      return res.status(400).json({ error: 'Name is required' });
-    }
-    
-    const userId = Array.isArray(id) ? id[0] : id;
-    const user = User.findByIdAndUpdate(
-      userId,
-      { name: name.trim() }
-    );
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
+    const user = userService.update(userId, { name });
     res.status(200).json(user);
-  } catch {
-    res.status(500).json({ error: 'Failed to update user' });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const deleteUser = (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { id } = req.params;
-    
-    const userId = Array.isArray(id) ? id[0] : id;
-    const user = User.findByIdAndDelete(userId);
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
+    const userId = getParam(req, 'id')!;
+    userService.delete(userId);
     res.status(200).json({ message: 'User deleted successfully' });
-  } catch {
-    res.status(500).json({ error: 'Failed to delete user' });
+  } catch (error) {
+    next(error);
   }
 };

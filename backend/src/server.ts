@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
 import cardRoutes from "./routes/cardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import { requestLogger, errorHandler } from "./middleware/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const version = fs
@@ -33,6 +34,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 const staticPath = path.join(__dirname, "../", "dist", "public");
 
@@ -55,6 +57,8 @@ app.use("/api/users", userRoutes);
 app.get("*", (req, res) => {
   res.sendFile(path.join(staticPath, "index.html"));
 });
+
+app.use(errorHandler);
 
 const startServer = () => {
   try {
