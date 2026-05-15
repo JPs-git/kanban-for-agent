@@ -13,6 +13,7 @@ import AddCardModal from "./AddCardModal";
 import UserManagement from "./UserManagement";
 import ToastManager from "./ToastManager";
 import Button from "./Button";
+import DashboardLayout from "./DashboardLayout";
 
 const KanbanBoard: React.FC = () => {
   const {
@@ -160,95 +161,94 @@ const KanbanBoard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-gray-500 text-lg">Loading...</div>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-full text-gray-500 text-lg">
+          Loading...
+        </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-red-500 text-lg">{error}</div>
-      </div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-full text-red-500 text-lg">
+          {error}
+        </div>
+      </DashboardLayout>
     );
   }
 
+  const actions = (
+    <>
+      <Button variant="success" onClick={() => setIsAddModalOpen(true)}>
+        <Plus className="w-4 h-4 mr-2" />
+        Add Card
+      </Button>
+      <Button variant="primary" onClick={() => setIsUserManagementOpen(true)}>
+        <Users className="w-4 h-4 mr-2" />
+        用户管理
+      </Button>
+    </>
+  );
+
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 py-6 px-4 flex items-center justify-center">
-        <div className="max-w-[1400px] w-full bg-white rounded-2xl shadow-xl p-4 md:p-6 h-[calc(100vh-3rem)] flex flex-col">
-          <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Kanban Board</h1>
-              <p className="text-sm text-gray-500 mt-1">管理您的任务和项目</p>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="success" onClick={() => setIsAddModalOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Card
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => setIsUserManagementOpen(true)}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                用户管理
-              </Button>
+      <DashboardLayout actions={actions}>
+        <div className="max-w-[1400px] w-full mx-auto h-full">
+          <div className="h-full bg-white rounded-2xl shadow-xl p-4 md:p-6">
+            <div className="h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              {Object.values(CardStatus).map((status) => (
+                <StatusColumn
+                  key={status}
+                  status={status}
+                  cards={groupedCards[status] || []}
+                  onCardDrop={handleCardDrop}
+                  onDeleteCard={(id) => {
+                    removeCard(id)
+                      .then(() => showToast("卡片删除成功", "success"))
+                      .catch(() => showToast("卡片删除失败", "error"));
+                  }}
+                  onEditCard={handleCardEdit}
+                />
+              ))}
             </div>
           </div>
-
-          <div className="flex gap-3 md:gap-4 overflow-x-auto pb-3 flex-1 min-h-0">
-            {Object.values(CardStatus).map((status) => (
-              <StatusColumn
-                key={status}
-                status={status}
-                cards={groupedCards[status] || []}
-                onCardDrop={handleCardDrop}
-                onDeleteCard={(id) => {
-                  removeCard(id)
-                    .then(() => showToast("卡片删除成功", "success"))
-                    .catch(() => showToast("卡片删除失败", "error"));
-                }}
-                onEditCard={handleCardEdit}
-              />
-            ))}
-          </div>
-
-          <CardEditModal
-            key={editCard?.id || "null"}
-            card={editCard}
-            isOpen={isEditModalOpen}
-            onClose={handleModalClose}
-            onSave={handleCardUpdate}
-            onDelete={(id) => {
-              removeCard(id)
-                .then(() => showToast("卡片删除成功", "success"))
-                .catch(() => showToast("卡片删除失败", "error"));
-            }}
-            users={users}
-          />
-
-          <AddCardModal
-            isOpen={isAddModalOpen}
-            onClose={() => setIsAddModalOpen(false)}
-            onAdd={handleAddCard}
-            users={users}
-          />
-
-          <UserManagement
-            isOpen={isUserManagementOpen}
-            onClose={() => setIsUserManagementOpen(false)}
-            users={users}
-            onAddUser={handleAddUser}
-            onUpdateUser={handleUpdateUser}
-            onDeleteUser={handleDeleteUser}
-            loading={usersLoading}
-          />
-
-          <ToastManager toasts={toasts} onClose={closeToast} />
         </div>
-      </div>
+
+        <CardEditModal
+          key={editCard?.id || "null"}
+          card={editCard}
+          isOpen={isEditModalOpen}
+          onClose={handleModalClose}
+          onSave={handleCardUpdate}
+          onDelete={(id) => {
+            removeCard(id)
+              .then(() => showToast("卡片删除成功", "success"))
+              .catch(() => showToast("卡片删除失败", "error"));
+          }}
+          users={users}
+        />
+
+        <AddCardModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddCard}
+          users={users}
+        />
+
+        <UserManagement
+          isOpen={isUserManagementOpen}
+          onClose={() => setIsUserManagementOpen(false)}
+          users={users}
+          onAddUser={handleAddUser}
+          onUpdateUser={handleUpdateUser}
+          onDeleteUser={handleDeleteUser}
+          loading={usersLoading}
+        />
+
+        <ToastManager toasts={toasts} onClose={closeToast} />
+      </DashboardLayout>
     </DndProvider>
   );
 };

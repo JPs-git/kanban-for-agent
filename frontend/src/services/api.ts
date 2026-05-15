@@ -3,6 +3,7 @@ import type { Card, CardCreate, CardUpdate } from "../types";
 export interface VersionInfo {
   version: string;
   environment: string;
+  buildDate?: string;
 }
 
 const API_URL = "/api/cards";
