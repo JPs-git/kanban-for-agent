@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { logger } from "../utils/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const baseDir = path.join(__dirname, "../..");
@@ -58,15 +59,15 @@ const recreateTableWithUUID = (
     db.exec(createTableSQL);
     db.exec(`INSERT INTO ${tableName} SELECT * FROM ${tableName}_old`);
     db.exec(`DROP TABLE ${tableName}_old`);
-    console.log(`Recreated ${tableName} table with uuid column`);
+    logger.info(`Recreated ${tableName} table with uuid column`);
   } catch (error) {
-    console.error(`Error recreating ${tableName} table:`, error);
+    logger.error(`Error recreating ${tableName} table:`, { error: (error as Error).message });
     try {
       db.exec(`DROP TABLE IF EXISTS ${tableName}`);
       db.exec(createTableSQL);
-      console.log(`Created new ${tableName} table`);
+      logger.info(`Created new ${tableName} table`);
     } catch (e) {
-      console.error(`Failed to create ${tableName} table:`, e);
+      logger.error(`Failed to create ${tableName} table:`, { error: (e as Error).message });
     }
   }
 };
@@ -125,7 +126,7 @@ export const initDB = (customPath?: string): Database.Database => {
     recreateTableWithUUID(db, "cards", createCardsTable);
   }
 
-  console.log(`SQLite database initialized at: ${dbPath}`);
+  logger.info('DB_INIT', `SQLite database initialized at: ${dbPath}`, { dbPath });
   return db;
 };
 

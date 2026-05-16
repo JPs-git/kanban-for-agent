@@ -269,6 +269,66 @@ Backend Response
 | `errorHandler` | `src/middleware/errorHandler.ts` | Centralized error handling |
 | `logger`       | `src/middleware/logger.ts`       | Request logging            |
 
+## Logging System
+
+### Log Levels
+
+**DEBUG**
+
+- Detailed debug information for development
+- Only visible when LOG_LEVEL=DEBUG
+
+**INFO**
+
+- General information about system operations
+- Default log level for production
+
+**WARN**
+
+- Warning messages about potential issues
+- Does not affect system operation
+
+**ERROR**
+
+- Critical error information
+- Requires attention from developers
+
+### Log Format
+
+All logs are formatted as **JSON Lines** for machine readability:
+
+```json
+{
+"timestamp": "2026-05-16T08:21:54.515Z",
+"level": "INFO",
+"event": "PROCESS_START",
+"message": "Starting Kanban backend",
+"pid": 20640,
+"env": "production",
+"version": "0.8.10"
+}
+```
+
+### Log Events
+
+| Event | Description |
+|-------|-------------|
+| `PROCESS_START` | 进程启动 |
+| `PROCESS_EXIT` | 进程退出 |
+| `PROCESS_UNCAUGHT_EXCEPTION` | 未捕获异常 |
+| `PROCESS_UNHANDLED_REJECTION` | 未处理的 Promise 拒绝 |
+| `PROCESS_SIGTERM` | 收到 SIGTERM 信号 |
+| `PROCESS_SIGINT` | 收到 SIGINT 信号 |
+| `DB_CONNECT` | 数据库连接 |
+| `DB_CONNECT_SUCCESS` | 数据库连接成功 |
+| `SERVER_LISTENING` | 服务器开始监听 |
+| `HTTP_REQUEST` | HTTP 请求 |
+
+### Log Output
+
+- **Console**: 实时输出到终端（前台运行模式）
+- **File**: 持久化到 `backend/logs/backend.log`
+
 ## Context Boundary
 
 This context manages:
@@ -277,6 +337,7 @@ This context manages:
 - User management
 - Task assignment
 - Status transitions
+- Logging and monitoring
 
 External integrations:
 
