@@ -27,7 +27,6 @@ const KanbanBoard: React.FC = () => {
   const {
     users,
     loading: usersLoading,
-    error: usersError,
     addUser,
     updateUser,
     removeUser,
