@@ -74,7 +74,7 @@ export async function update() {
 export async function start() {
   const backendService = new BackendServiceClass();
 
-  if (await backendService.start()) {
+  if (await backendService.start({ foreground: true })) {
     loggerInstance.success('Kanban service started successfully!');
   } else {
     loggerInstance.failure('Failed to start Kanban service. Check if it is already running.');

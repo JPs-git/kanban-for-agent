@@ -16,31 +16,44 @@ class Logger {
     this.logFile = path.join(logDir, 'cli.log');
   }
 
-  log(level, message) {
-    const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+  formatJsonLine(level, message, extra = {}) {
+    return JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: level.toUpperCase(),
+      message,
+      pid: process.pid,
+      ...extra
+    }) + '\n';
+  }
+
+  log(level, message, extra) {
+    const jsonLine = this.formatJsonLine(level, message, extra);
     
-    console[level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log'](logMessage);
+    if (level === 'error') {
+      console.error(jsonLine);
+    } else {
+      console.log(jsonLine);
+    }
     
     if (this.logFile) {
-      fs.appendFileSync(this.logFile, logMessage + '\n');
+      fs.appendFileSync(this.logFile, jsonLine);
     }
   }
 
-  debug(message) {
-    this.log('debug', message);
+  debug(message, extra) {
+    this.log('debug', message, extra);
   }
 
-  info(message) {
-    this.log('info', message);
+  info(message, extra) {
+    this.log('info', message, extra);
   }
 
-  warn(message) {
-    this.log('warn', message);
+  warn(message, extra) {
+    this.log('warn', message, extra);
   }
 
-  error(message) {
-    this.log('error', message);
+  error(message, extra) {
+    this.log('error', message, extra);
   }
 
   success(message) {

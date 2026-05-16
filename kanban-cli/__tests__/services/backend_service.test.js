@@ -53,4 +53,55 @@ describe('BackendService', () => {
     expect(status.running).toBe(false);
     expect(status.pid).toBe(null);
   });
+
+  test('should pass foreground option to process manager', async () => {
+    const { BackendService } = await import('../../src/services/backend_service.js');
+    const { ProcessManager } = await import('../../src/services/process_manager.js');
+    
+    const mockStart = jest.fn().mockResolvedValue(true);
+    ProcessManager.prototype.start = mockStart;
+    
+    const service = new BackendService();
+    await service.start({ foreground: true });
+    
+    expect(mockStart).toHaveBeenCalledWith(
+      ['node', 'dist/server.js'],
+      expect.any(Object),
+      { foreground: true }
+    );
+  });
+
+  test('should use foreground mode by default', async () => {
+    const { BackendService } = await import('../../src/services/backend_service.js');
+    const { ProcessManager } = await import('../../src/services/process_manager.js');
+    
+    const mockStart = jest.fn().mockResolvedValue(true);
+    ProcessManager.prototype.start = mockStart;
+    
+    const service = new BackendService();
+    await service.start();
+    
+    expect(mockStart).toHaveBeenCalledWith(
+      ['node', 'dist/server.js'],
+      expect.any(Object),
+      { foreground: true }
+    );
+  });
+
+  test('should support background mode via options', async () => {
+    const { BackendService } = await import('../../src/services/backend_service.js');
+    const { ProcessManager } = await import('../../src/services/process_manager.js');
+    
+    const mockStart = jest.fn().mockResolvedValue(true);
+    ProcessManager.prototype.start = mockStart;
+    
+    const service = new BackendService();
+    await service.start({ foreground: false });
+    
+    expect(mockStart).toHaveBeenCalledWith(
+      ['node', 'dist/server.js'],
+      expect.any(Object),
+      { foreground: false }
+    );
+  });
 });

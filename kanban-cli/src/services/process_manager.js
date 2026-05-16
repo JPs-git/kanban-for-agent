@@ -51,7 +51,7 @@ class ProcessManager {
     }
   }
 
-  async start(command, env) {
+  async start(command, env, options = {}) {
     if (this.isRunning()) {
       logger.warn('Backend is already running');
       return false;
@@ -63,12 +63,14 @@ class ProcessManager {
       const mergedEnv = { ...process.env, ...env };
       mergedEnv.NODE_ENV = 'production';
 
+      const foreground = options.foreground !== false;
+
       this.process = spawn(command[0], command.slice(1), {
         env: mergedEnv,
         cwd: path.join(config.repoPath, 'backend'),
-        stdio: ['ignore', 'pipe', 'pipe'],
-        detached: true,
-        windowsHide: true
+        stdio: foreground ? ['inherit', 'pipe', 'pipe'] : ['ignore', 'pipe', 'pipe'],
+        detached: !foreground,
+        windowsHide: !foreground
       });
 
       this.writePid(this.process.pid);
@@ -83,8 +85,17 @@ class ProcessManager {
         { flags: 'a' }
       );
 
-      this.process.stdout.pipe(logStream);
-      this.process.stderr.pipe(logStream);
+      this.process.stdout.on('data', (data) => {
+        const output = data.toString();
+        process.stdout.write(output);
+        logStream.write(output);
+      });
+
+      this.process.stderr.on('data', (data) => {
+        const output = data.toString();
+        process.stderr.write(output);
+        logStream.write(output);
+      });
 
       this.process.on('error', (err) => {
         logger.error(`Process error: ${err.message}`);
@@ -93,6 +104,7 @@ class ProcessManager {
 
       this.process.on('exit', (code) => {
         logger.info(`Backend process exited with code ${code}`);
+        logStream.end();
         this.cleanup();
       });
 
@@ -100,11 +112,21 @@ class ProcessManager {
 
       if (!this.process || this.process.exitCode !== null) {
         logger.error('Process exited immediately');
+        logStream.end();
         this.cleanup();
         return false;
       }
 
       logger.info(`Backend started with PID ${this.process.pid}`);
+
+      if (foreground) {
+        await new Promise((resolve) => {
+          this.process.on('exit', () => {
+            resolve();
+          });
+        });
+      }
+
       return true;
 
     } catch (err) {
