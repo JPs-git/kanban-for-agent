@@ -1,6 +1,6 @@
 {
   "name": "kanban-cli",
-  "version": "0.8.9",
+  "version": "0.8.10",
   "description": "Kanban for Agent CLI - Local deployment tool",
   "type": "module",
   "main": "src/cli.js",
