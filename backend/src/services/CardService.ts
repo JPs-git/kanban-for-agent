@@ -1,6 +1,7 @@
 import { Card, CardStatus } from '../models/Card';
 import { CardRepository } from '../repositories';
 import { ValidationError, NotFoundError, BusinessRuleError } from '../errors';
+import type { BusinessRuleCode } from '../errors';
 
 export class CardService {
   constructor(private cardRepository: CardRepository) {}
@@ -85,6 +86,19 @@ export class CardService {
     return deletedCard;
   }
 
+  private getBusinessRuleCode(currentStatus: CardStatus, newStatus: CardStatus): BusinessRuleCode {
+    if (currentStatus === CardStatus.DONE && newStatus === CardStatus.REJECTED) {
+      return 'CARD_NOT_TRANSITIONABLE_TO_REJECTED';
+    }
+    if (currentStatus === CardStatus.TODO && newStatus === CardStatus.DONE) {
+      return 'CARD_MUST_BE_STARTED_BEFORE_COMPLETION';
+    }
+    if (currentStatus === CardStatus.IN_PROGRESS && newStatus === CardStatus.TODO) {
+      return 'CARD_CANNOT_BE_REOPENED';
+    }
+    return 'INVALID_STATUS_TRANSITION';
+  }
+
   private validateStatusTransition(currentStatus: CardStatus, newStatus: CardStatus): void {
     const validTransitions: Record<CardStatus, CardStatus[]> = {
       [CardStatus.TODO]: [CardStatus.IN_PROGRESS, CardStatus.REJECTED],
@@ -94,8 +108,10 @@ export class CardService {
     };
 
     if (!validTransitions[currentStatus].includes(newStatus)) {
+      const ruleCode = this.getBusinessRuleCode(currentStatus, newStatus);
       throw new BusinessRuleError(
         `Cannot transition from ${currentStatus} to ${newStatus}`,
+        ruleCode,
         { field: 'status', reason: `valid transitions from ${currentStatus}: ${validTransitions[currentStatus].join(', ')}` }
       );
     }

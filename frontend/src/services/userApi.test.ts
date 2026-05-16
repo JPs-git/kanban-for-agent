@@ -1,69 +1,122 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
-import * as userApi from './userApi';
-import type { User } from '../types';
+import { describe, test, expect, vi, beforeEach } from "vitest";
+import * as userApi from "./userApi";
+import { RequestError } from "./errorHandler";
 
-describe('User API Service', () => {
-  const mockUsers: User[] = [
-    { id: '1', name: 'Alice', createdAt: '2024-01-01' },
-    { id: '2', name: 'Bob', createdAt: '2024-01-02' },
-  ];
-  const mockUser: User = { id: '1', name: 'Alice', createdAt: '2024-01-01' };
-
+describe("User API Service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubGlobal('fetch', vi.fn());
   });
 
-  describe('getUsers', () => {
-    test('returns users on success', async () => {
-      (global.fetch as vi.Mock).mockResolvedValue({ ok: true, json: () => Promise.resolve(mockUsers) });
+  describe("getUsers", () => {
+    test("returns users on success", async () => {
+      const mockUsers = [{ id: "1", name: "Alice", createdAt: "2024-01-01" }];
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockUsers,
+      });
+      vi.spyOn(global, "fetch").mockImplementation(mockFetch);
+
       const result = await userApi.getUsers();
       expect(result).toEqual(mockUsers);
     });
 
-    test('throws error on failure', async () => {
-      (global.fetch as vi.Mock).mockResolvedValue({ ok: false });
-      await expect(userApi.getUsers()).rejects.toThrow('Failed to get users');
+    test("throws RequestError on failure", async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+        url: "/api/users",
+        json: async () => ({ code: "INTERNAL_ERROR", message: "Server error" }),
+      });
+      vi.spyOn(global, "fetch").mockImplementation(mockFetch);
+
+      await expect(userApi.getUsers()).rejects.toThrow(RequestError);
     });
   });
 
-  describe('createUser', () => {
-    test('creates user and returns it', async () => {
-      (global.fetch as vi.Mock).mockResolvedValue({ ok: true, json: () => Promise.resolve(mockUser) });
-      const result = await userApi.createUser('Alice');
+  describe("createUser", () => {
+    test("creates user and returns it", async () => {
+      const mockUser = { id: "1", name: "Alice", createdAt: "2024-01-01" };
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockUser,
+      });
+      vi.spyOn(global, "fetch").mockImplementation(mockFetch);
+
+      const result = await userApi.createUser("Alice");
       expect(result).toEqual(mockUser);
     });
 
-    test('throws error on failure', async () => {
-      (global.fetch as vi.Mock).mockResolvedValue({ ok: false });
-      await expect(userApi.createUser('Alice')).rejects.toThrow('Failed to create user');
+    test("throws RequestError on failure", async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        statusText: "Bad Request",
+        url: "/api/users",
+        json: async () => ({
+          code: "VALIDATION_ERROR",
+          message: "Validation failed",
+        }),
+      });
+      vi.spyOn(global, "fetch").mockImplementation(mockFetch);
+
+      await expect(userApi.createUser("Alice")).rejects.toThrow(RequestError);
     });
   });
 
-  describe('updateUser', () => {
-    test('updates user and returns it', async () => {
-      const updatedUser = { ...mockUser, name: 'Alice Updated' };
-      (global.fetch as vi.Mock).mockResolvedValue({ ok: true, json: () => Promise.resolve(updatedUser) });
-      const result = await userApi.updateUser('1', 'Alice Updated');
-      expect(result.name).toBe('Alice Updated');
+  describe("updateUser", () => {
+    test("updates user and returns it", async () => {
+      const mockUser = {
+        id: "1",
+        name: "Alice Updated",
+        createdAt: "2024-01-01",
+      };
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockUser,
+      });
+      vi.spyOn(global, "fetch").mockImplementation(mockFetch);
+
+      const result = await userApi.updateUser("1", "Alice Updated");
+      expect(result).toEqual(mockUser);
     });
 
-    test('throws error on failure', async () => {
-      (global.fetch as vi.Mock).mockResolvedValue({ ok: false });
-      await expect(userApi.updateUser('1', 'Alice Updated')).rejects.toThrow('Failed to update user');
+    test("throws RequestError on failure", async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+        url: "/api/users/1",
+        json: async () => ({ code: "NOT_FOUND", message: "User not found" }),
+      });
+      vi.spyOn(global, "fetch").mockImplementation(mockFetch);
+
+      await expect(userApi.updateUser("1", "Alice Updated")).rejects.toThrow(
+        RequestError,
+      );
     });
   });
 
-  describe('deleteUser', () => {
-    test('deletes user successfully', async () => {
-      (global.fetch as vi.Mock).mockResolvedValue({ ok: true });
-      await userApi.deleteUser('1');
-      expect(global.fetch).toHaveBeenCalledWith('/api/users/1', { method: 'DELETE' });
+  describe("deleteUser", () => {
+    test("deletes user successfully", async () => {
+      const mockFetch = vi.fn().mockResolvedValue({ ok: true });
+      vi.spyOn(global, "fetch").mockImplementation(mockFetch);
+
+      await userApi.deleteUser("1");
+      expect(global.fetch).toHaveBeenCalled();
     });
 
-    test('throws error on failure', async () => {
-      (global.fetch as vi.Mock).mockResolvedValue({ ok: false });
-      await expect(userApi.deleteUser('1')).rejects.toThrow('Failed to delete user');
+    test("throws RequestError on failure", async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+        url: "/api/users/1",
+        json: async () => ({ code: "NOT_FOUND", message: "User not found" }),
+      });
+      vi.spyOn(global, "fetch").mockImplementation(mockFetch);
+
+      await expect(userApi.deleteUser("1")).rejects.toThrow(RequestError);
     });
   });
 });

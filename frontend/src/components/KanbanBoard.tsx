@@ -6,12 +6,11 @@ import { CardStatus } from "../types";
 import type { Card, CardCreate } from "../types";
 import { useKanban } from "../hooks/useKanban";
 import { useUsers } from "../hooks/useUsers";
-import * as api from "../services/api";
+import { useToast } from "../context/useToast";
 import StatusColumn from "./StatusColumn";
 import CardEditModal from "./CardEditModal";
 import AddCardModal from "./AddCardModal";
 import UserManagement from "./UserManagement";
-import ToastManager from "./ToastManager";
 import Button from "./Button";
 import DashboardLayout from "./DashboardLayout";
 
@@ -19,9 +18,8 @@ const KanbanBoard: React.FC = () => {
   const {
     cards,
     loading: cardsLoading,
-    error: cardsError,
-    fetchCards,
     addCard,
+    updateCard,
     updateCardStatus,
     removeCard,
   } = useKanban();
@@ -29,44 +27,17 @@ const KanbanBoard: React.FC = () => {
   const {
     users,
     loading: usersLoading,
-    error: usersError,
     addUser,
     updateUser,
     removeUser,
   } = useUsers();
 
+  const { showSuccess } = useToast();
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editCard, setEditCard] = useState<Partial<Card> | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
-  const [toasts, setToasts] = useState<
-    Array<{
-      id: string;
-      message: string;
-      type: "success" | "warning" | "error";
-      duration?: number;
-    }>
-  >([]);
-
-  const showToast = (
-    message: string,
-    type: "success" | "warning" | "error",
-    duration: number = 3000,
-  ) => {
-    setToasts((prev) => [
-      ...prev,
-      {
-        id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        message,
-        type,
-        duration,
-      },
-    ]);
-  };
-
-  const closeToast = (id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
 
   const groupedCards = cards.reduce(
     (acc, card) => {
@@ -79,8 +50,11 @@ const KanbanBoard: React.FC = () => {
     {} as Record<CardStatus, Card[]>,
   );
 
-  const handleCardDrop = (cardId: string, newStatus: CardStatus) => {
-    updateCardStatus(cardId, newStatus);
+  const handleCardDrop = async (cardId: string, newStatus: CardStatus) => {
+    const result = await updateCardStatus(cardId, newStatus);
+    if (result) {
+      showSuccess("卡片状态更新成功");
+    }
   };
 
   const handleCardEdit = (card: Partial<Card>) => {
@@ -98,13 +72,9 @@ const KanbanBoard: React.FC = () => {
       assigneeName?: string;
     },
   ) => {
-    try {
-      await api.updateCard(id, updates);
-      fetchCards();
-      showToast("卡片更新成功", "success");
-    } catch (error) {
-      console.error("Failed to update card:", error);
-      showToast("卡片更新失败，请稍后重试", "error");
+    const result = await updateCard(id, updates);
+    if (result) {
+      showSuccess("卡片更新成功");
     }
   };
 
@@ -114,66 +84,40 @@ const KanbanBoard: React.FC = () => {
   };
 
   const handleAddCard = async (card: CardCreate) => {
-    try {
-      await addCard(card);
-      showToast("卡片添加成功", "success");
-    } catch (error) {
-      console.error("添加卡片失败:", error);
-      showToast("添加卡片失败，请稍后重试", "error");
+    const result = await addCard(card);
+    if (result) {
+      showSuccess("卡片添加成功");
     }
   };
 
   const handleAddUser = async (name: string) => {
-    try {
-      await addUser(name);
-      showToast("用户添加成功", "success");
-    } catch (error) {
-      console.error("添加用户失败:", error);
-      showToast("添加用户失败，请稍后重试", "error");
-      throw error;
+    const result = await addUser(name);
+    if (result) {
+      showSuccess("用户添加成功");
     }
   };
 
   const handleUpdateUser = async (id: string, name: string) => {
-    try {
-      await updateUser(id, name);
-      showToast("用户更新成功", "success");
-    } catch (error) {
-      console.error("更新用户失败:", error);
-      showToast("更新用户失败，请稍后重试", "error");
-      throw error;
+    const result = await updateUser(id, name);
+    if (result) {
+      showSuccess("用户更新成功");
     }
   };
 
   const handleDeleteUser = async (id: string) => {
-    try {
-      await removeUser(id);
-      showToast("用户删除成功", "success");
-    } catch (error) {
-      console.error("删除用户失败:", error);
-      showToast("删除用户失败，请稍后重试", "error");
-      throw error;
+    const result = await removeUser(id);
+    if (result !== undefined) {
+      showSuccess("用户删除成功");
     }
   };
 
   const loading = cardsLoading || usersLoading;
-  const error = cardsError || usersError;
 
   if (loading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full text-gray-500 text-lg">
           Loading...
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-full text-red-500 text-lg">
-          {error}
         </div>
       </DashboardLayout>
     );
@@ -205,9 +149,11 @@ const KanbanBoard: React.FC = () => {
                   cards={groupedCards[status] || []}
                   onCardDrop={handleCardDrop}
                   onDeleteCard={(id) => {
-                    removeCard(id)
-                      .then(() => showToast("卡片删除成功", "success"))
-                      .catch(() => showToast("卡片删除失败", "error"));
+                    removeCard(id).then((result) => {
+                      if (result) {
+                        showSuccess("卡片删除成功");
+                      }
+                    });
                   }}
                   onEditCard={handleCardEdit}
                 />
@@ -223,9 +169,11 @@ const KanbanBoard: React.FC = () => {
           onClose={handleModalClose}
           onSave={handleCardUpdate}
           onDelete={(id) => {
-            removeCard(id)
-              .then(() => showToast("卡片删除成功", "success"))
-              .catch(() => showToast("卡片删除失败", "error"));
+            removeCard(id).then((result) => {
+              if (result) {
+                showSuccess("卡片删除成功");
+              }
+            });
           }}
           users={users}
         />
@@ -246,8 +194,6 @@ const KanbanBoard: React.FC = () => {
           onDeleteUser={handleDeleteUser}
           loading={usersLoading}
         />
-
-        <ToastManager toasts={toasts} onClose={closeToast} />
       </DashboardLayout>
     </DndProvider>
   );
