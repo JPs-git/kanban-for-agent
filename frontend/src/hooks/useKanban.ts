@@ -62,7 +62,8 @@ export const useKanban = () => {
 
   useEffect(() => {
     fetchCards();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally only run on mount
 
   return {
     cards,

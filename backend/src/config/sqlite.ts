@@ -134,7 +134,8 @@ export const getDB = (): Database.Database => {
   if (!db) {
     initDB();
   }
-  return db!;
+  if (!db) throw new Error('Database not initialized');
+  return db;
 };
 
 export const resetDB = (customPath?: string): Database.Database => {
