@@ -60,7 +60,9 @@ export class CardService {
       if (!Object.values(CardStatus).includes(updateData.status)) {
         throw new ValidationError('Invalid status', { field: 'status', reason: 'must be one of: TODO, IN_PROGRESS, DONE, REJECTED' });
       }
-      this.validateStatusTransition(existingCard.status, updateData.status);
+      if (updateData.status !== existingCard.status) {
+        this.validateStatusTransition(existingCard.status, updateData.status);
+      }
     }
 
     if (updateData.assignee && !updateData.assigneeName) {
@@ -102,7 +104,7 @@ export class CardService {
   private validateStatusTransition(currentStatus: CardStatus, newStatus: CardStatus): void {
     const validTransitions: Record<CardStatus, CardStatus[]> = {
       [CardStatus.TODO]: [CardStatus.IN_PROGRESS, CardStatus.REJECTED],
-      [CardStatus.IN_PROGRESS]: [CardStatus.TODO, CardStatus.DONE, CardStatus.REJECTED],
+      [CardStatus.IN_PROGRESS]: [CardStatus.DONE, CardStatus.REJECTED],
       [CardStatus.DONE]: [CardStatus.IN_PROGRESS],
       [CardStatus.REJECTED]: [CardStatus.TODO],
     };

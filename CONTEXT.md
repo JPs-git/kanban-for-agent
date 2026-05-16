@@ -248,9 +248,11 @@ Backend Response
 | From State   | Allowed Transitions    |
 | ------------ | ---------------------- |
 | TODO         | IN\_PROGRESS, REJECTED |
-| IN\_PROGRESS | TODO, DONE, REJECTED   |
+| IN\_PROGRESS | DONE, REJECTED        |
 | DONE         | IN\_PROGRESS           |
-| REJECTED     | TODO                   |
+| REJECTED     | TODO                  |
+
+**Note**: 更新卡片时，如果状态保持不变（如 TODO → TODO），则不受状态转换规则限制，允许直接更新。
 
 ## Utility Functions
 
