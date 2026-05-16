@@ -1,12 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import Toast from "./Toast";
-
-interface ToastItem {
-  id: string;
-  message: string;
-  type: "success" | "warning" | "error";
-  duration?: number;
-}
+import type { ToastItem } from "../context/ToastContext.types";
 
 interface ToastManagerProps {
   toasts: ToastItem[];
@@ -14,15 +8,23 @@ interface ToastManagerProps {
 }
 
 const ToastManager: React.FC<ToastManagerProps> = ({ toasts, onClose }) => {
+  const handleRemove = useCallback(
+    (id: string) => {
+      onClose(id);
+    },
+    [onClose],
+  );
+
   return (
     <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
       {toasts.map((toast) => (
         <Toast
           key={toast.id}
+          id={toast.id}
           message={toast.message}
           type={toast.type}
-          onClose={() => onClose(toast.id)}
           duration={toast.duration}
+          onRemove={handleRemove}
         />
       ))}
     </div>

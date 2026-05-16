@@ -1,8 +1,15 @@
 export type ErrorCode = 'VALIDATION_ERROR' | 'NOT_FOUND' | 'BUSINESS_RULE_VIOLATION' | 'INTERNAL_ERROR' | 'UNAUTHORIZED';
 
+export type BusinessRuleCode =
+  | 'INVALID_STATUS_TRANSITION'
+  | 'CARD_NOT_TRANSITIONABLE_TO_REJECTED'
+  | 'CARD_MUST_BE_STARTED_BEFORE_COMPLETION'
+  | 'CARD_CANNOT_BE_REOPENED';
+
 export interface ErrorDetails {
   field?: string;
   reason?: string;
+  ruleCode?: BusinessRuleCode;
 }
 
 export class AppError extends Error {
@@ -49,9 +56,12 @@ export class NotFoundError extends AppError {
 }
 
 export class BusinessRuleError extends AppError {
-  constructor(message: string, details?: ErrorDetails) {
-    super(message, 'BUSINESS_RULE_VIOLATION', 400, details);
+  public readonly ruleCode: BusinessRuleCode;
+
+  constructor(message: string, ruleCode: BusinessRuleCode, details?: ErrorDetails) {
+    super(message, 'BUSINESS_RULE_VIOLATION', 409, { ...details, ruleCode });
     this.name = 'BusinessRuleError';
+    this.ruleCode = ruleCode;
     Object.setPrototypeOf(this, BusinessRuleError.prototype);
   }
 }

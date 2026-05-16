@@ -4,6 +4,7 @@ import { useKanban } from './useKanban';
 import * as api from '../services/api';
 import type { Card, CardCreate } from '../types';
 import { CardStatus } from '../types';
+import { ToastProvider } from '../context/ToastContext';
 
 vi.mock('../services/api');
 
@@ -22,11 +23,12 @@ describe('useKanban Hook', () => {
   test('initializes with loading state and fetches cards', async () => {
     (api.getCards as vi.Mock).mockResolvedValue(mockCards);
 
-    const { result } = renderHook(() => useKanban());
+    const { result } = renderHook(() => useKanban(), {
+      wrapper: ToastProvider,
+    });
 
     expect(result.current.loading).toBe(true);
     expect(result.current.cards).toEqual([]);
-    expect(result.current.error).toBe(null);
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -39,11 +41,12 @@ describe('useKanban Hook', () => {
     const mockError = new Error('Failed to fetch cards');
     (api.getCards as vi.Mock).mockRejectedValue(mockError);
 
-    const { result } = renderHook(() => useKanban());
+    const { result } = renderHook(() => useKanban(), {
+      wrapper: ToastProvider,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-      expect(result.current.error).toBe('Failed to fetch cards');
       expect(result.current.cards).toEqual([]);
     });
   });
@@ -52,7 +55,9 @@ describe('useKanban Hook', () => {
     (api.getCards as vi.Mock).mockResolvedValue(mockCards);
     (api.createCard as vi.Mock).mockResolvedValue(mockNewCard);
 
-    const { result } = renderHook(() => useKanban());
+    const { result } = renderHook(() => useKanban(), {
+      wrapper: ToastProvider,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -73,7 +78,9 @@ describe('useKanban Hook', () => {
     (api.getCards as vi.Mock).mockResolvedValue(mockCards);
     (api.createCard as vi.Mock).mockRejectedValue(new Error('Failed to create'));
 
-    const { result } = renderHook(() => useKanban());
+    const { result } = renderHook(() => useKanban(), {
+      wrapper: ToastProvider,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -82,10 +89,10 @@ describe('useKanban Hook', () => {
     const cardCreate: CardCreate = { title: 'New Card', content: 'New Desc' };
     
     await act(async () => {
-      await expect(result.current.addCard(cardCreate)).rejects.toThrow();
+      const resultValue = await result.current.addCard(cardCreate);
+      expect(resultValue).toBeUndefined();
     });
 
-    expect(result.current.error).toBe('Failed to create card');
     expect(result.current.cards.length).toBe(2);
   });
 
@@ -94,7 +101,9 @@ describe('useKanban Hook', () => {
     const updatedCard = { ...mockCards[0], status: CardStatus.DONE };
     (api.updateCard as vi.Mock).mockResolvedValue(updatedCard);
 
-    const { result } = renderHook(() => useKanban());
+    const { result } = renderHook(() => useKanban(), {
+      wrapper: ToastProvider,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -112,7 +121,9 @@ describe('useKanban Hook', () => {
     (api.getCards as vi.Mock).mockResolvedValue(mockCards);
     (api.deleteCard as vi.Mock).mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useKanban());
+    const { result } = renderHook(() => useKanban(), {
+      wrapper: ToastProvider,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -131,7 +142,9 @@ describe('useKanban Hook', () => {
     const newCards: Card[] = [{ id: '3', title: 'Refreshed', content: 'New', status: CardStatus.TODO, createdAt: '2024-01-03', updatedAt: '2024-01-03' }];
     (api.getCards as vi.Mock).mockResolvedValueOnce(mockCards).mockResolvedValueOnce(newCards);
 
-    const { result } = renderHook(() => useKanban());
+    const { result } = renderHook(() => useKanban(), {
+      wrapper: ToastProvider,
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
