@@ -1,6 +1,6 @@
-import { IUser } from '../models/User';
-import { UserRepository } from '../repositories';
-import { ValidationError, NotFoundError } from '../errors';
+import { IUser } from '../models/User.js';
+import { UserRepository } from '../repositories/index.js';
+import { ValidationError, NotFoundError } from '../errors/index.js';
 
 export class UserService {
   constructor(private userRepository: UserRepository) {}

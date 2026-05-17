@@ -1,7 +1,7 @@
 import crypto from 'crypto';
-import { getDB } from '../config/sqlite';
-import { Card, CardStatus } from '../models/Card';
-import { CardRepository } from './CardRepository';
+import { getDB } from '../config/sqlite.js';
+import { Card, CardStatus } from '../models/Card.js';
+import { CardRepository } from './CardRepository.js';
 
 interface CardRow {
   id: number;

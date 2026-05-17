@@ -1,4 +1,4 @@
-export { CardRepository } from './CardRepository';
-export { UserRepository } from './UserRepository';
-export { SQLiteCardRepository } from './SQLiteCardRepository';
-export { SQLiteUserRepository } from './SQLiteUserRepository';
+export { CardRepository } from './CardRepository.js';
+export { UserRepository } from './UserRepository.js';
+export { SQLiteCardRepository } from './SQLiteCardRepository.js';
+export { SQLiteUserRepository } from './SQLiteUserRepository.js';

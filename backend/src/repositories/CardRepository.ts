@@ -1,4 +1,4 @@
-import { Card, CardStatus } from '../models/Card';
+import { Card, CardStatus } from '../models/Card.js';
 
 export abstract class CardRepository {
   abstract find(): Card[];

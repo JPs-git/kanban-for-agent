@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { UserService } from '../services';
-import { SQLiteUserRepository } from '../repositories';
-import { getParam } from '../utils/request';
+import { UserService } from '../services/index.js';
+import { SQLiteUserRepository } from '../repositories/index.js';
+import { getParam } from '../utils/request.js';
 
 const userRepository = new SQLiteUserRepository();
 const userService = new UserService(userRepository);

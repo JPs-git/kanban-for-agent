@@ -52,16 +52,6 @@ export class Logger {
       });
     });
 
-    process.on('SIGTERM', () => {
-      this.info('PROCESS_SIGTERM', 'Received SIGTERM, shutting down gracefully');
-      this.close();
-    });
-
-    process.on('SIGINT', () => {
-      this.info('PROCESS_SIGINT', 'Received SIGINT, shutting down gracefully');
-      this.close();
-    });
-
     process.on('exit', (code) => {
       this.info('PROCESS_EXIT', `Process exiting with code ${code}`, { exitCode: code });
       this.close();

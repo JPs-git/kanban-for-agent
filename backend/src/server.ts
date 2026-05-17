@@ -33,6 +33,8 @@ process.env.NODE_ENV = env;
 export const app = express();
 const PORT = process.env.PORT || 3000;
 
+let server: ReturnType<typeof app.listen> | null = null;
+
 app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
@@ -77,12 +79,38 @@ const startServer = async () => {
     await connectDB();
     logger.info("DB_CONNECT_SUCCESS", "Database connection established");
 
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       logger.info("SERVER_LISTENING", `Server running on http://localhost:${PORT}`, {
         port: PORT,
         environment: process.env.NODE_ENV
       });
     });
+
+    const gracefulShutdown = (signal: string) => {
+      logger.info('GRACEFUL_SHUTDOWN', `Received ${signal}, starting graceful shutdown`, { signal });
+
+      if (server) {
+        server.close((err) => {
+          if (err) {
+            logger.error('SERVER_CLOSE_ERROR', 'Error during server shutdown', { error: err.message });
+            process.exit(1);
+          } else {
+            logger.info('SERVER_CLOSED', 'Server closed successfully');
+            process.exit(0);
+          }
+        });
+
+        setTimeout(() => {
+          logger.warn('SHUTDOWN_TIMEOUT', 'Forcing shutdown after timeout');
+          process.exit(1);
+        }, 10000);
+      } else {
+        process.exit(0);
+      }
+    };
+
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
   } catch (error) {
     logger.error("STARTUP_ERROR", "Failed to start server", {
