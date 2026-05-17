@@ -1,14 +1,18 @@
-import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../errors';
+import { Request, Response, NextFunction } from "express";
+import { AppError } from "../errors";
+import { logger } from "../utils/logger.js";
 
 export const errorHandler = (
   error: Error,
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _next: NextFunction
+  _next: NextFunction,
 ): void => {
-  console.error('Error:', error);
+  logger.error("UNHANDLED_ERROR", "Unhandled error occurred", {
+    error: error.message,
+    stack: error.stack,
+  });
 
   if (error instanceof AppError) {
     res.status(error.httpStatus).json({
@@ -24,8 +28,8 @@ export const errorHandler = (
 
   res.status(500).json({
     error: {
-      code: 'INTERNAL_ERROR',
-      message: 'An unexpected error occurred',
+      code: "INTERNAL_ERROR",
+      message: "An unexpected error occurred",
       details: undefined,
       timestamp: new Date().toISOString(),
     },
