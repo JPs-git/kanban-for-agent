@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { CardService } from '../services';
-import { SQLiteCardRepository } from '../repositories';
-import { getParam } from '../utils/request';
+import { CardService } from '../services/index.js';
+import { SQLiteCardRepository } from '../repositories/index.js';
+import { getParam } from '../utils/request.js';
 
 const cardRepository = new SQLiteCardRepository();
 const cardService = new CardService(cardRepository);

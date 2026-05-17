@@ -1,7 +1,7 @@
-import { Card, CardStatus } from '../models/Card';
-import { CardRepository } from '../repositories';
-import { ValidationError, NotFoundError, BusinessRuleError } from '../errors';
-import type { BusinessRuleCode } from '../errors';
+import { Card, CardStatus } from '../models/Card.js';
+import { CardRepository } from '../repositories/index.js';
+import { ValidationError, NotFoundError, BusinessRuleError } from '../errors/index.js';
+import type { BusinessRuleCode } from '../errors/index.js';
 
 export class CardService {
   constructor(private cardRepository: CardRepository) {}

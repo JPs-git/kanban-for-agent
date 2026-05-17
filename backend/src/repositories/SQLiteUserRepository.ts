@@ -1,7 +1,7 @@
 import crypto from 'crypto';
-import { getDB } from '../config/sqlite';
-import { IUser } from '../models/User';
-import { UserRepository } from './UserRepository';
+import { getDB } from '../config/sqlite.js';
+import { IUser } from '../models/User.js';
+import { UserRepository } from './UserRepository.js';
 
 interface UserRow {
   id: number;
