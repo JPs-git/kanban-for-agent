@@ -17,3 +17,14 @@ backend/data/
 
 # Trae IDE configuration
 .trae/
+
+# CLI
+kanban-cli/node_modules
+kanban-cli/coverage
+kanban-cli/.kanban-for-agent
+
+# Husky
+.husky/_
+
+# OS files
+Thumbs.db

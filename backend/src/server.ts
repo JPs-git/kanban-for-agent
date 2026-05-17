@@ -7,6 +7,8 @@ import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
 import cardRoutes from "./routes/cardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import { requestLogger, errorHandler } from "./middleware/index.js";
+import { logger } from "./utils/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const version = fs
@@ -33,6 +35,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 const staticPath = path.join(__dirname, "../", "dist", "public");
 
@@ -56,15 +59,36 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(staticPath, "index.html"));
 });
 
-const startServer = () => {
+app.use(errorHandler);
+
+const startServer = async () => {
   try {
-    connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV}`);
+    logger.info("PROCESS_START", "Starting Kanban backend", {
+      version,
+      nodeVersion: process.version,
+      platform: process.platform,
+      arch: process.arch
     });
+
+    logger.info("DB_CONNECT", "Connecting to database", {
+      sqlitePath: process.env.SQLITE_PATH
+    });
+
+    await connectDB();
+    logger.info("DB_CONNECT_SUCCESS", "Database connection established");
+
+    app.listen(PORT, () => {
+      logger.info("SERVER_LISTENING", `Server running on http://localhost:${PORT}`, {
+        port: PORT,
+        environment: process.env.NODE_ENV
+      });
+    });
+
   } catch (error) {
-    console.error("Error starting server:", error);
+    logger.error("STARTUP_ERROR", "Failed to start server", {
+      error: (error as Error).message,
+      stack: (error as Error).stack
+    });
     process.exit(1);
   }
 };

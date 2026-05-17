@@ -31,7 +31,8 @@ echo Cloning repository...
 if exist "%REPO_DIR%\.git" (
     cd /d "%REPO_DIR%"
     git checkout master
-    git pull origin master
+    git fetch origin master
+    git reset --hard origin/master
 ) else (
     rmdir /s /q "%REPO_DIR%" 2>nul
     git clone https://github.com/JPs-git/kanban-for-agent.git "%REPO_DIR%"

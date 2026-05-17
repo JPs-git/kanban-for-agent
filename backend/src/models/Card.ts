@@ -20,7 +20,7 @@ interface CardRow {
   updatedAt: string;
 }
 
-interface Card {
+export interface Card {
   id: string;
   title: string;
   content?: string;

@@ -1,62 +1,100 @@
 import { logger } from '../utils/logger.js';
 import { BackendService } from '../services/backend_service.js';
 import { config } from '../utils/config.js';
+import {
+  cards,
+  cardGet,
+  cardCreate,
+  cardUpdate,
+  cardDelete,
+  cardGetHelp,
+  cardCreateHelp,
+  cardUpdateHelp,
+  cardDeleteHelp,
+  __setApiClient as __setCardApiClient,
+  __setLogger as __setCardLogger,
+} from './card.js';
+
+let BackendServiceClass = BackendService;
+let loggerInstance = logger;
+
+export function __setBackendService(service) {
+  BackendServiceClass = service;
+}
+
+export function __setLogger(log) {
+  loggerInstance = log;
+  __setCardLogger(log);
+}
+
+export {
+  cards,
+  cardGet,
+  cardCreate,
+  cardUpdate,
+  cardDelete,
+  cardGetHelp,
+  cardCreateHelp,
+  cardUpdateHelp,
+  cardDeleteHelp,
+  __setCardApiClient,
+};
 
 export async function deploy(repoUrl) {
-  const backendService = new BackendService();
+  const backendService = new BackendServiceClass();
 
   const success = await backendService.deploy(repoUrl);
 
   if (success) {
-    logger.success('Deployment completed successfully!');
+    loggerInstance.success('Deployment completed successfully!');
     await backendService.start();
-    logger.info(`Kanban service is starting on port ${config.serverPort}`);
+    loggerInstance.info(`Kanban service is starting on port ${config.serverPort}`);
   } else {
-    logger.failure('Deployment failed. Check logs for details.');
+    loggerInstance.failure('Deployment failed. Check logs for details.');
     process.exit(1);
   }
 }
 
 export async function update() {
-  const backendService = new BackendService();
+  const backendService = new BackendServiceClass();
 
-  logger.info('Updating from repository...');
+  loggerInstance.info('Updating from repository...');
   const success = await backendService.update();
 
   if (success) {
-    logger.success('Update completed successfully!');
+    loggerInstance.success('Update completed successfully!');
     await backendService.restart();
-    logger.info(`Kanban service restarted on port ${config.serverPort}`);
+    loggerInstance.info(`Kanban service restarted on port ${config.serverPort}`);
   } else {
-    logger.failure('Update failed. Check logs for details.');
+    loggerInstance.failure('Update failed. Check logs for details.');
     process.exit(1);
   }
 }
 
 export async function start() {
-  const backendService = new BackendService();
+  const backendService = new BackendServiceClass();
 
-  if (await backendService.start()) {
-    logger.success('Kanban service started successfully!');
+  if (await backendService.start({ foreground: true })) {
+    loggerInstance.success('Kanban service started successfully!');
   } else {
-    logger.failure('Failed to start Kanban service. Check if it is already running.');
+    loggerInstance.failure('Failed to start Kanban service. Check if it is already running.');
     process.exit(1);
   }
 }
 
 export async function stop() {
-  const backendService = new BackendService();
+  const backendService = new BackendServiceClass();
 
   if (await backendService.stop()) {
-    logger.success('Kanban service stopped successfully!');
+    loggerInstance.success('Kanban service stopped successfully!');
   } else {
-    logger.failure('Failed to stop Kanban service.');
+    loggerInstance.failure('Failed to stop Kanban service.');
     process.exit(1);
   }
 }
 
 export function status() {
-  const backendService = new BackendService();
+  const backendService = new BackendServiceClass();
   const status = backendService.getStatus();
 
   if (status.running) {
@@ -76,18 +114,18 @@ export function status() {
 }
 
 export async function restart() {
-  const backendService = new BackendService();
+  const backendService = new BackendServiceClass();
 
   if (await backendService.restart()) {
-    logger.success('Kanban service restarted successfully!');
+    loggerInstance.success('Kanban service restarted successfully!');
   } else {
-    logger.failure('Failed to restart Kanban service.');
+    loggerInstance.failure('Failed to restart Kanban service.');
     process.exit(1);
   }
 }
 
 export function logs(lines = 50) {
-  const backendService = new BackendService();
+  const backendService = new BackendServiceClass();
   const logLines = backendService.getLogs(lines);
 
   if (logLines.length > 0) {

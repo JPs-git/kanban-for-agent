@@ -1,15 +1,19 @@
 {
   "name": "kanban-for-agent",
-  "version": "0.7.10",
+  "version": "0.8.14",
   "description": "Kanban full-stack application for syncing human and agent work progress",
   "main": "index.js",
   "scripts": {
+    "prepare": "husky install",
     "dev": "npx concurrently --names \"frontend,backend\" --prefix-colors \"green,blue\" \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
     "install": "cd frontend && npm install && cd ../backend && npm install",
     "build": "cd frontend && npm run build && cd ../backend && npm run build",
     "start:prod": "npm run build && npm run copy:frontend && cd backend && npm run start",
     "copy:frontend": "node scripts/copy-frontend.js",
-    "test:unit": "cd frontend && npm run test:unit && cd ../backend && npm run test:unit",
+    "test:unit": "cd frontend && npm run test:unit && cd ../backend && npm run test:unit && cd ../kanban-cli && npm test",
+    "test:integration": "cd backend && npm run test:integration",
+    "test": "npm run test:unit && npm run test:integration",
+    "check": "npm run lint",
     "lint": "cd frontend && npm run lint && cd ../backend && npm run lint",
     "version:sync": "node scripts/version-sync.js"
   },
@@ -23,6 +27,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^9.0.1"
+    "concurrently": "^9.0.1",
+    "husky": "^9.1.7"
   }
 }

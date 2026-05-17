@@ -49,7 +49,7 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
     <div
       ref={drop as unknown as React.Ref<HTMLDivElement>}
       data-testid="status-column"
-      className={`flex flex-col bg-gray-50 rounded-xl p-3 border border-gray-200 transition-all duration-200 w-full flex-1 min-w-[240px] max-w-[320px] ${
+      className={`flex flex-col bg-gray-50 rounded-xl p-3 border border-gray-200 transition-all duration-200 w-full min-w-[240px] ${
         isOver ? "bg-blue-50 border-blue-300 ring-2 ring-blue-200" : ""
       }`}
     >

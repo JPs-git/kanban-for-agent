@@ -2,7 +2,9 @@ import typescriptEslintPlugin from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 
 export default [
-  // 源文件配置
+  {
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**']
+  },
   {
     files: ['src/**/*.ts'],
     languageOptions: {

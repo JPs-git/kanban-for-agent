@@ -96,10 +96,11 @@ class BackendService {
     }
   }
 
-  async start() {
+  async start(options = {}) {
     if (!this.processManager.isRunning()) {
       const command = this.getStartCommand();
-      return this.processManager.start(command, this.getEnv());
+      const foreground = options.foreground !== false;
+      return this.processManager.start(command, this.getEnv(), { foreground });
     } else {
       logger.info('Backend is already running');
       return true;

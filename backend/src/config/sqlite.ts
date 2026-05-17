@@ -2,39 +2,30 @@ import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { logger } from "../utils/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const NODE_ENV = process.env.NODE_ENV || "development";
-
-let dbPath: string;
 const baseDir = path.join(__dirname, "../..");
 
-if (process.env.SQLITE_PATH) {
-  dbPath = path.isAbsolute(process.env.SQLITE_PATH)
-    ? process.env.SQLITE_PATH
-    : path.join(baseDir, process.env.SQLITE_PATH);
-} else {
+const getDBPath = (): string => {
+  if (process.env.SQLITE_PATH) {
+    return path.isAbsolute(process.env.SQLITE_PATH)
+      ? process.env.SQLITE_PATH
+      : path.join(baseDir, process.env.SQLITE_PATH);
+  }
+  
+  const NODE_ENV = process.env.NODE_ENV || "development";
   switch (NODE_ENV) {
     case "test":
-      dbPath =
-        process.env.SQLITE_TEST_PATH || path.join(baseDir, "data/test.db");
-      break;
+      return process.env.SQLITE_TEST_PATH || path.join(baseDir, "data/test.db");
     case "production":
-      dbPath =
-        process.env.SQLITE_PROD_PATH || path.join(baseDir, "data/prod.db");
-      break;
+      return process.env.SQLITE_PROD_PATH || path.join(baseDir, "data/prod.db");
     default:
-      dbPath = process.env.SQLITE_DEV_PATH || path.join(baseDir, "data/dev.db");
+      return process.env.SQLITE_DEV_PATH || path.join(baseDir, "data/dev.db");
   }
-}
+};
 
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
-let db: Database.Database;
+let db: Database.Database | null = null;
 
 const tableExists = (db: Database.Database, tableName: string): boolean => {
   const result = db
@@ -68,20 +59,26 @@ const recreateTableWithUUID = (
     db.exec(createTableSQL);
     db.exec(`INSERT INTO ${tableName} SELECT * FROM ${tableName}_old`);
     db.exec(`DROP TABLE ${tableName}_old`);
-    console.log(`Recreated ${tableName} table with uuid column`);
+    logger.info(`Recreated ${tableName} table with uuid column`);
   } catch (error) {
-    console.error(`Error recreating ${tableName} table:`, error);
+    logger.error(`Error recreating ${tableName} table:`, { error: (error as Error).message });
     try {
       db.exec(`DROP TABLE IF EXISTS ${tableName}`);
       db.exec(createTableSQL);
-      console.log(`Created new ${tableName} table`);
+      logger.info(`Created new ${tableName} table`);
     } catch (e) {
-      console.error(`Failed to create ${tableName} table:`, e);
+      logger.error(`Failed to create ${tableName} table:`, { error: (e as Error).message });
     }
   }
 };
 
-export const initDB = () => {
+export const initDB = (customPath?: string): Database.Database => {
+  const dbPath = customPath || getDBPath();
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+  
   db = new Database(dbPath);
   db.pragma("journal_mode = WAL");
 
@@ -129,13 +126,22 @@ export const initDB = () => {
     recreateTableWithUUID(db, "cards", createCardsTable);
   }
 
-  console.log(`SQLite database initialized at: ${dbPath}`);
+  logger.info('DB_INIT', `SQLite database initialized at: ${dbPath}`, { dbPath });
   return db;
 };
 
-export const getDB = () => {
+export const getDB = (): Database.Database => {
   if (!db) {
     initDB();
   }
+  if (!db) throw new Error('Database not initialized');
   return db;
+};
+
+export const resetDB = (customPath?: string): Database.Database => {
+  if (db) {
+    db.close();
+    db = null;
+  }
+  return initDB(customPath);
 };
