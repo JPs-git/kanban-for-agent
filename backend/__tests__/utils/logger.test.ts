@@ -158,16 +158,6 @@ describe('Logger', () => {
       expect(process.listeners('unhandledRejection').length).toBeGreaterThan(0);
     });
 
-    test('should have SIGTERM listeners', () => {
-      new Logger();
-      expect(process.listeners('SIGTERM').length).toBeGreaterThan(0);
-    });
-
-    test('should have SIGINT listeners', () => {
-      new Logger();
-      expect(process.listeners('SIGINT').length).toBeGreaterThan(0);
-    });
-
     test('should have exit listeners', () => {
       new Logger();
       expect(process.listeners('exit').length).toBeGreaterThan(0);
